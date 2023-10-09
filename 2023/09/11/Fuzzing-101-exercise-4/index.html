@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="wammr">
+
+
+
+
+
+
+
+<title>Fuzzing 101 exercise 4 | Welcome to wa1king_pil0t&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 6.3.0"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">
+          
+            Frame.
+          
+        </a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archive</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/categories/gallery/">Gallery</a>
+              </li> 
+                   
+          
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/Fuzzing-101/">
+                            Fuzzing 101
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                Fuzzing 101 exercise 4
+            
+            
+        </div>
+        <span class="post-date">
+            9月 11, 2023
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h3 id="下载并构建目标"><a href="#下载并构建目标" class="headerlink" title="下载并构建目标"></a>下载并构建目标</h3><p>首先获取模糊目标，为要模糊的项目创建一个新目录：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd $HOME</span><br><span class="line">mkdir fuzzing_tiff &amp;&amp; cd fuzzing_tiff/</span><br></pre></td></tr></table></figure>
+
+<p>下载并解压缩 libtiff 4.0.4：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wget https://download.osgeo.org/libtiff/tiff-4.0.4.tar.gz</span><br><span class="line">tar -xzvf tiff-4.0.4.tar.gz</span><br></pre></td></tr></table></figure>
+
+<p>现在构建和安装 libtiff：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cd tiff-4.0.4/</span><br><span class="line">./configure --prefix=&quot;$HOME/fuzzing_tiff/install/&quot; --disable-shared</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+<p>测试tiffinfo是否正常工作，输入：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$HOME/fuzzing_tiff/install/bin/tiffinfo -D -j -c -r -s -w $HOME/fuzzing_tiff/tiff-4.0.4/test/images/palette-1c-1b.tiff</span><br></pre></td></tr></table></figure>
+
+<p>发现tiffinfo可以正常工作：</p>
+<p><img src="/pic/image-20230716100643388.png" alt="image-20230716100643388"></p>
+<h3 id="代码覆盖率"><a href="#代码覆盖率" class="headerlink" title="代码覆盖率"></a>代码覆盖率</h3><p>代码覆盖率是一个软件指标，显示每行代码被触发的次数。</p>
+<p>首先，安装 lcov使用以下命令来完成：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt install lcov</span><br></pre></td></tr></table></figure>
+
+<p>安装lcov的时候出现问题：“&#x2F;var&#x2F;lib&#x2F;dpkg&#x2F;lock-frontend error”</p>
+<p>解决方法：sudo rm &#x2F;var&#x2F;lib&#x2F;dpkg&#x2F;lock-frontend     &amp;    sudo rm &#x2F;var&#x2F;lib&#x2F;dpkg&#x2F;lock</p>
+<p>参考链接：<a target="_blank" rel="noopener" href="https://www.zhihu.com/question/590708259">(15 封私信) 如何解决 Could not get lock &#x2F;var&#x2F;lib&#x2F;dpkg&#x2F;lock 问题？ - 知乎 (zhihu.com)</a></p>
+<p>现在需要用编译器和链接器重建 libTIFF：<code>--coverage</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">rm -r $HOME/fuzzing_tiff/install</span><br><span class="line">cd $HOME/fuzzing_tiff/tiff-4.0.4/</span><br><span class="line">make clean</span><br><span class="line">  </span><br><span class="line">CFLAGS=&quot;--coverage&quot; LDFLAGS=&quot;--coverage&quot; ./configure --prefix=&quot;$HOME/fuzzing_tiff/install/&quot; --disable-shared</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+
+
+<p>然后，通过输入以下内容来收集代码覆盖率数据：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cd $HOME/fuzzing_tiff/tiff-4.0.4/</span><br><span class="line">lcov --zerocounters --directory ./</span><br><span class="line">lcov --capture --initial --directory ./ --output-file app.info</span><br><span class="line">$HOME/fuzzing_tiff/install/bin/tiffinfo -D -j -c -r -s -w $HOME/fuzzing_tiff/tiff-4.0.4/test/images/palette-1c-1b.tiff</span><br><span class="line">lcov --no-checksum --directory ./ --capture --output-file app2.info</span><br></pre></td></tr></table></figure>
+
+
+
+<p>对于每个命令的解释：</p>
+<ul>
+<li><code>lcov --zerocounters --directory ./</code>：重置以前的计数器</li>
+<li><code>lcov --capture --initial --directory ./ --output-file app.info</code>：返回“基线”覆盖率数据文件，其中包含每个检测行的零覆盖率</li>
+<li><code>$HOME/fuzzing_tiff/install/bin/tiffinfo -D -j -c -r -s -w $HOME/fuzzing_tiff/tiff-4.0.4/test/images/palette-1c-1b.tiff</code>：运行要分析的应用程序，可以使用不同的输入多次运行它</li>
+<li><code>lcov --no-checksum --directory ./ --capture --output-file app2.info</code>：将当前覆盖状态保存到 app2.info 文件中</li>
+</ul>
+<p>最后，生成 HTML 输出：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">genhtml --highlight --legend -output-directory ./html-coverage/ ./app2.info</span><br></pre></td></tr></table></figure>
+
+
+
+<p>在该文件夹中创建代码覆盖率报告，打开文件<code>./html-coverage/index.html</code>  ，看到如下所示的内容：</p>
+<p><img src="/pic/image-20230716105059464.png" alt="image-20230716105059464"></p>
+<h3 id="模糊测试"><a href="#模糊测试" class="headerlink" title="模糊测试"></a>模糊测试</h3><p>现在将在启用 ASAN 的情况下编译 libtiff。</p>
+<p>首先清理所有以前编译的对象文件和可执行文件：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">rm -r $HOME/fuzzing_tiff/install</span><br><span class="line">cd $HOME/fuzzing_tiff/tiff-4.0.4/</span><br><span class="line">make clean</span><br></pre></td></tr></table></figure>
+
+<p>调用make之前设置AFL_USE_ASAN&#x3D;1：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">export LLVM_CONFIG=&quot;llvm-config-11&quot;</span><br><span class="line">CC=afl-clang-lto ./configure --prefix=&quot;$HOME/fuzzing_tiff/install/&quot; --disable-shared</span><br><span class="line">AFL_USE_ASAN=1 make -j4</span><br><span class="line">AFL_USE_ASAN=1 make install</span><br></pre></td></tr></table></figure>
+
+<p>现在，使用以下命令运行模糊程序：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">afl-fuzz -m none -i $HOME/fuzzing_tiff/tiff-4.0.4/test/images/ -o $HOME/fuzzing_tiff/out/ -s 123 -- $HOME/fuzzing_tiff/install/bin/tiffinfo -D -j -c -r -s -w @@</span><br></pre></td></tr></table></figure>
+
+<p>看到结果，这次时间非常迅速：</p>
+<p><img src="/pic/image-20230717084245382.png" alt="image-20230717084245382"></p>
+<h3 id="ASan跟踪"><a href="#ASan跟踪" class="headerlink" title="ASan跟踪"></a>ASan跟踪</h3><p>输入命令：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$HOME/fuzzing_tiff/install/bin/tiffinfo -D -j -c -r -s -w &#x27;/home/fuzz/fuzzing_tiff/out/default/crashes/id:000000,sig:06,src:000000,time:1287,execs:1016,op:havoc,rep:1&#x27;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/pic/image-20230717084601733.png" alt="image-20230717084601733"></p>
+<h3 id="代码覆盖率测量"><a href="#代码覆盖率测量" class="headerlink" title="代码覆盖率测量"></a>代码覆盖率测量</h3><p>跟上面的代码覆盖率过程类似，只不过使用crashes里的文件：</p>
+<p>重建 libTIFF：<code>--coverage</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">rm -r $HOME/fuzzing_tiff/install</span><br><span class="line">cd $HOME/fuzzing_tiff/tiff-4.0.4/</span><br><span class="line">make clean</span><br><span class="line">  </span><br><span class="line">CFLAGS=&quot;--coverage&quot; LDFLAGS=&quot;--coverage&quot; ./configure --prefix=&quot;$HOME/fuzzing_tiff/install/&quot; --disable-shared</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+
+
+<p>然后，我们可以通过键入以下内容来收集代码覆盖率数据：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">cd $HOME/fuzzing_tiff/tiff-4.0.4/</span><br><span class="line">lcov --zerocounters --directory ./</span><br><span class="line">lcov --capture --initial --directory ./ --output-file app.info</span><br><span class="line">$HOME/fuzzing_tiff/install/bin/tiffinfo -D -j -c -r -s -w $HOME/fuzzing_tiff/out/default/crashes/id:000000,sig:06,src:000000,time:1287,execs:1016,op:havoc,rep:1</span><br><span class="line">lcov --no-checksum --directory ./ --capture --output-file app2.info</span><br></pre></td></tr></table></figure>
+
+<p>结果如下：</p>
+<p><img src="/pic/image-20230717091512980.png" alt="image-20230717091512980"></p>
+<p>本次实验引入了一个新的概念代码覆盖率，通过使用代码覆盖率，可以了解模糊器到达了代码的哪些部分，并可视化模糊处理过程。完成本练习后，对如何使用LCOV测量代码覆盖率有了一定的了解，在今后的学习过程中也可以通过使用该工具来可视化模糊处理。</p>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+                <div class="icon arrow-left"></div>
+                <div class="post-link">
+                    <a href="/2023/09/11/Fuzzing-101-exercise-5/">Prev</a>
+                </div>
+            
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2023/09/11/Fuzzing-101-exercise-3/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+    
+      <div class="post-comment">
+
+     
+
+     
+    
+    
+
+</div>
+     
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://github.com/zoeingwingkei/frame/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    
+    
+
+  </body>
+</html>

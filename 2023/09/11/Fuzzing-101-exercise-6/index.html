@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="wammr">
+
+
+
+
+
+
+
+<title>Fuzzing 101 exercise 6 | Welcome to wa1king_pil0t&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 6.3.0"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">
+          
+            Frame.
+          
+        </a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archive</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/categories/gallery/">Gallery</a>
+              </li> 
+                   
+          
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/Fuzzing-101/">
+                            Fuzzing 101
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                Fuzzing 101 exercise 6
+            
+            
+        </div>
+        <span class="post-date">
+            9月 11, 2023
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h3 id="下载并构建目标"><a href="#下载并构建目标" class="headerlink" title="下载并构建目标"></a>下载并构建目标</h3><p>首先获取模糊目标，为要模糊的项目创建一个新目录：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd $HOME</span><br><span class="line">mkdir Fuzzing_gimp &amp;&amp; cd Fuzzing_gimp</span><br></pre></td></tr></table></figure>
+
+<p>现在，安装所需的依赖项：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">sudo apt-get install build-essential libatk1.0-dev libfontconfig1-dev libcairo2-dev libgudev-1.0-0 libdbus-1-dev libdbus-glib-1-dev libexif-dev libxfixes-dev libgtk2.0-dev python2.7-dev libpango1.0-dev libglib2.0-dev zlib1g-dev intltool libbabl-dev</span><br></pre></td></tr></table></figure>
+
+<p>下载并构建 GEGL 0.2（通用图形库）：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wget https://download.gimp.org/pub/gegl/0.2/gegl-0.2.0.tar.bz2</span><br><span class="line">tar xvf gegl-0.2.0.tar.bz2 &amp;&amp; cd gegl-0.2.0</span><br></pre></td></tr></table></figure>
+
+<p>对源代码进行两个小的更改：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">sed -i &#x27;s/CODEC_CAP_TRUNCATED/AV_CODEC_CAP_TRUNCATED/g&#x27; ./operations/external/ff-load.c</span><br><span class="line">sed -i &#x27;s/CODEC_FLAG_TRUNCATED/AV_CODEC_FLAG_TRUNCATED/g&#x27; ./operations/external/ff-load.c</span><br></pre></td></tr></table></figure>
+
+<p>构建并安装 Gegl-0.2：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">./configure --enable-debug --disable-glibtest  --without-vala --without-cairo --without-pango --without-pangocairo --without-gdk-pixbuf --without-lensfun --without-libjpeg --without-libpng --without-librsvg --without-openexr --without-sdl --without-libopenraw --without-jasper --without-graphviz --without-lua --without-libavformat --without-libv4l --without-libspiro --without-exiv2 --without-umfpack</span><br><span class="line">make -j$(nproc)</span><br><span class="line">sudo make install</span><br></pre></td></tr></table></figure>
+
+<p>下载并解压缩 GIMP 2.8.16：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd ..</span><br><span class="line">wget https://mirror.klaus-uwe.me/gimp/pub/gimp/v2.8/gimp-2.8.16.tar.bz2</span><br><span class="line">tar xvf gimp-2.8.16.tar.bz2 &amp;&amp; cd gimp-2.8.16/</span><br></pre></td></tr></table></figure>
+
+<p>使用 <strong>afl-clang-lto</strong> 作为编译器构建 GIMP 的时间：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">CC=afl-clang-lto CXX=afl-clang-lto++ PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$HOME/Fuzzing_gimp/gegl-0.2.0/ CFLAGS=&quot;-fsanitize=address&quot; CXXFLAGS=&quot;-fsanitize=address&quot; LDFLAGS=&quot;-fsanitize=address&quot; ./configure --disable-gtktest --disable-glibtest --disable-alsatest --disable-nls --without-libtiff --without-libjpeg --without-bzip2 --without-gs --without-libpng --without-libmng --without-libexif --without-aa --without-libxpm --without-webkit --without-librsvg --without-print --without-poppler --without-cairo-pdf --without-gvfs --without-libcurl --without-wmf --without-libjasper --without-alsa --without-gudev --disable-python --enable-gimp-console --without-mac-twain --without-script-fu --without-gudev --without-dbus --disable-mp --without-linux-input --without-xvfb-run --with-gif-compression=none --without-xmc --with-shm=none --enable-debug  --prefix=&quot;$HOME/Fuzzing_gimp/gimp-2.8.16/install&quot;</span><br><span class="line">make -j$(nproc)</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="持续模式"><a href="#持续模式" class="headerlink" title="持续模式"></a>持续模式</h3><p>教程给出了两种方法，这里采用第二种：在函数中插入AFL_LOOP宏</p>
+<p><img src="/pic/image-20230720102031144.png" alt="image-20230720102031144"></p>
+<h3 id="种子语料库创建"><a href="#种子语料库创建" class="headerlink" title="种子语料库创建"></a>种子语料库创建</h3><p>将 [SampleInput.xcf](<a target="_blank" rel="noopener" href="https://github.com/antonio-morales/Fuzzing101/blob/main/Exercise">https://github.com/antonio-morales/Fuzzing101/blob/main/Exercise</a> 6&#x2F;SampleInput.xcf) 文件复制到 AFL 输入文件夹</p>
+<h3 id="模糊测试时间"><a href="#模糊测试时间" class="headerlink" title="模糊测试时间"></a>模糊测试时间</h3><p>由于该漏洞会影响 GIMP 核心，因此可以通过删除不需要的插件来节省一些启动时间：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">rm ./install/lib/gimp/2.0/plug-ins/*</span><br></pre></td></tr></table></figure>
+
+<p>使用以下命令运行模糊程序：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">ASAN_OPTIONS=detect_leaks=0,abort_on_error=1,symbolize=0 afl-fuzz -i &#x27;./afl_in&#x27; -o &#x27;./afl_out&#x27; -D -t 100 -- ./install/bin/gimp-console-2.8 --verbose -d -f @@</span><br></pre></td></tr></table></figure>
+
+<p>目前出现以下错误还没解决…</p>
+<p><img src="/pic/image-20230725153700422.png" alt="image-20230725153700422"></p>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+                <div class="icon arrow-left"></div>
+                <div class="post-link">
+                    <a href="/2023/09/11/Fuzzing-101-exercise-9/">Prev</a>
+                </div>
+            
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2023/09/11/Fuzzing-101-exercise-5/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+    
+      <div class="post-comment">
+
+     
+
+     
+    
+    
+
+</div>
+     
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://github.com/zoeingwingkei/frame/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    
+    
+
+  </body>
+</html>

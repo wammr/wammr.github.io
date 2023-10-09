@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="wammr">
+
+
+
+
+
+
+
+<title>Fuzzing 101 exercise 3 | Welcome to wa1king_pil0t&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 6.3.0"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">
+          
+            Frame.
+          
+        </a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archive</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/categories/gallery/">Gallery</a>
+              </li> 
+                   
+          
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/Fuzzing-101/">
+                            Fuzzing 101
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                Fuzzing 101 exercise 3
+            
+            
+        </div>
+        <span class="post-date">
+            9月 11, 2023
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h3 id="下载并构建目标"><a href="#下载并构建目标" class="headerlink" title="下载并构建目标"></a>下载并构建目标</h3><p>首先获取模糊目标，为要模糊的项目创建一个新目录：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cd $HOME</span><br><span class="line">mkdir fuzzing_tcpdump &amp;&amp; cd fuzzing_tcpdump/</span><br></pre></td></tr></table></figure>
+
+
+
+<p>下载并解压缩 tcpdump-4.9.2.tar.gz</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wget https://github.com/the-tcpdump-group/tcpdump/archive/refs/tags/tcpdump-4.9.2.tar.gz</span><br><span class="line">tar -xzvf tcpdump-4.9.2.tar.gz</span><br></pre></td></tr></table></figure>
+
+
+
+<p>下载libpcap，这是TCPdump需要的跨平台库，下载并解压缩 libpcap-1.8.0.tar.gz：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">wget https://github.com/the-tcpdump-group/libpcap/archive/refs/tags/libpcap-1.8.0.tar.gz</span><br><span class="line">tar -xzvf libpcap-1.8.0.tar.gz</span><br></pre></td></tr></table></figure>
+
+
+
+<p>重命名为 libpcap-1.8.0,否则，tcpdump 找不到本地路径</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">mv libpcap-libpcap-1.8.0/ libpcap-1.8.0</span><br></pre></td></tr></table></figure>
+
+
+
+<p>构建并安装 libpcap：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">cd $HOME/fuzzing_tcpdump/libpcap-1.8.0/</span><br><span class="line">./configure --enable-shared=no</span><br><span class="line">make</span><br></pre></td></tr></table></figure>
+
+
+
+<p>现在，我们可以构建和安装 tcpdump：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">cd $HOME/fuzzing_tcpdump/tcpdump-tcpdump-4.9.2/</span><br><span class="line">./configure --prefix=&quot;$HOME/fuzzing_tcpdump/install/&quot;</span><br><span class="line">make</span><br><span class="line">make install</span><br></pre></td></tr></table></figure>
+
+
+
+<p>要测试一切是否正常工作，只需键入：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$HOME/fuzzing_tcpdump/install/sbin/tcpdump -h</span><br></pre></td></tr></table></figure>
+
+<p>能够看到以下输出：</p>
+<p><img src="/pic/image-20230715150153509.png" alt="image-20230715150153509"></p>
+<h3 id="种子语料库创建"><a href="#种子语料库创建" class="headerlink" title="种子语料库创建"></a>种子语料库创建</h3><p>可以在“.&#x2F;tests”文件夹中找到很多.pcacp示例。可以使用以下命令行运行这些 .pcap 文件：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$HOME/fuzzing_tcpdump/install/sbin/tcpdump -vvvvXX -ee -nn -r [.pcap file]</span><br></pre></td></tr></table></figure>
+
+<p>例如：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$HOME/fuzzing_tcpdump/install/sbin/tcpdump -vvvvXX -ee -nn -r ./tests/geneve.pcap</span><br></pre></td></tr></table></figure>
+
+<p>输出应如下所示：</p>
+<p><img src="/pic/image-20230715150403380.png" alt="image-20230715150403380"></p>
+<h2 id="ASan"><a href="#ASan" class="headerlink" title="ASan"></a>ASan</h2><p><strong>ASan</strong>是C和C++的快速内存错误检测器，它由编译器检测模块和运行时库组成，该工具能够查找对堆、堆栈和全局对象的越界访问，以及释放后使用、双重释放和内存泄漏错误。</p>
+<p>接下来要在启用ASan的情况下构建tcpdump（和libpcap）。</p>
+<p>首先，我们将清理所有以前编译的对象文件和可执行文件：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">rm -r $HOME/fuzzing_tcpdump/install</span><br><span class="line">cd $HOME/fuzzing_tcpdump/libpcap-1.8.0/</span><br><span class="line">make clean</span><br><span class="line"></span><br><span class="line">cd $HOME/fuzzing_tcpdump/tcpdump-tcpdump-4.9.2/</span><br><span class="line">make clean</span><br></pre></td></tr></table></figure>
+
+
+
+<p>现在，我们在调用之前设置和：<code>AFL_USE_ASAN=1  configure  make</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br></pre></td><td class="code"><pre><span class="line">cd $HOME/fuzzing_tcpdump/libpcap-1.8.0/</span><br><span class="line">export LLVM_CONFIG=&quot;llvm-config-11&quot;</span><br><span class="line">CC=afl-clang-lto ./configure --enable-shared=no --prefix=&quot;$HOME/fuzzing_tcpdump/install/&quot;</span><br><span class="line">AFL_USE_ASAN=1 make</span><br><span class="line"></span><br><span class="line">cd $HOME/fuzzing_tcpdump/tcpdump-tcpdump-4.9.2/</span><br><span class="line">AFL_USE_ASAN=1 CC=afl-clang-lto ./configure --prefix=&quot;$HOME/fuzzing_tcpdump/install/&quot;</span><br><span class="line">AFL_USE_ASAN=1 make</span><br><span class="line">AFL_USE_ASAN=1 make install</span><br></pre></td></tr></table></figure>
+
+
+
+<h3 id="模糊测试"><a href="#模糊测试" class="headerlink" title="模糊测试"></a>模糊测试</h3><p>使用以下命令运行模糊程序：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">afl-fuzz -m none -i $HOME/fuzzing_tcpdump/tcpdump-tcpdump-4.9.2/tests/ -o $HOME/fuzzing_tcpdump/out/ -s 123 -- $HOME/fuzzing_tcpdump/install/sbin/tcpdump -vvvvXX -ee -nn -r @@</span><br></pre></td></tr></table></figure>
+
+<p><strong>注意：64 位系统上的 ASAN 请求大量虚拟内存。这就是设置了标志“-m none”来禁用 AFL 中的内存限制的原因</strong></p>
+<p>一段时间后，出现多次崩溃：</p>
+<p><img src="/pic/image-20230715211944641.png" alt="image-20230715211944641"></p>
+<h3 id="Triage"><a href="#Triage" class="headerlink" title="Triage"></a>Triage</h3><p>调试使用 ASan 构建的程序比前面的练习要容易，向程序提供崩溃文件：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">$HOME/fuzzing_tcpdump/install/sbin/tcpdump -vvvvXX -ee -nn -r &#x27;/home/fuzz/fuzzing_tcpdump/out/default/crashes/id:000000,sig:06,src:007367,time:10720920,execs:4393777,op:havoc,rep:2&#x27;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>获得崩溃的良好摘要，包括执行跟踪：</p>
+<p><img src="/pic/image-20230715215336460.png" alt="image-20230715215336460"></p>
+<p>发现有堆溢出heap-buffer-overflow</p>
+<p>官方给出的修复方案见：<a target="_blank" rel="noopener" href="https://github.com/the-tcpdump-group/tcpdump/commit/85078eeaf4bf8fcdc14a4e79b516f92b6ab520fc#diff-05f854a9033643de07f0d0059bc5b98f3b314eeb1e2499ea1057e925e6501ae8L381">Use nd_ types, add EXTRACT_, fix a bounds check. · the-tcpdump-group&#x2F;tcpdump@85078ee (github.com)</a></p>
+<p>本此实验加深了对AFL的理解，熟悉了tcpdump工具，以及AScan的使用过程。另外，换成官方建议给出的Ubuntu20版本能感到实验确实顺利了很多，看来环境的建议还是要听哇T_T</p>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+                <div class="icon arrow-left"></div>
+                <div class="post-link">
+                    <a href="/2023/09/11/Fuzzing-101-exercise-4/">Prev</a>
+                </div>
+            
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2023/09/11/Fuzzing-101-exercise-2/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+    
+      <div class="post-comment">
+
+     
+
+     
+    
+    
+
+</div>
+     
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://github.com/zoeingwingkei/frame/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    
+    
+
+  </body>
+</html>

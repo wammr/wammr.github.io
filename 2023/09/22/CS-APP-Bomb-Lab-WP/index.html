@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="wammr">
+
+
+
+
+
+
+
+<title>CS:APP Bomb Lab WP | Welcome to wa1king_pil0t&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 6.3.0"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">
+          
+            Frame.
+          
+        </a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archive</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/categories/gallery/">Gallery</a>
+              </li> 
+                   
+          
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/CS-APP/">
+                            CS:APP
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                CS:APP Bomb Lab WP
+            
+            
+        </div>
+        <span class="post-date">
+            9月 22, 2023
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <p>需要的前置知识：</p>
+<ul>
+<li>汇编语言</li>
+<li>gdb的使用</li>
+</ul>
+<h2 id="phase-1"><a href="#phase-1" class="headerlink" title="phase_1"></a>phase_1</h2><p>查看第一关的汇编代码，如下：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">.text:0000000000400EE0 phase_1         proc near               ; CODE XREF: main+9A↑p</span><br><span class="line">.text:0000000000400EE0 ; __unwind &#123;</span><br><span class="line">.text:0000000000400EE0                 sub     rsp, 8</span><br><span class="line">.text:0000000000400EE4                 mov     esi, offset aBorderRelation ; &quot;Border relations with Canada have never&quot;...</span><br><span class="line">.text:0000000000400EE9                 call    strings_not_equal</span><br><span class="line">.text:0000000000400EEE                 test    eax, eax</span><br><span class="line">.text:0000000000400EF0                 jz      short loc_400EF7</span><br><span class="line">.text:0000000000400EF2                 call    explode_bomb</span><br></pre></td></tr></table></figure>
+
+<p>直接查看offset aBorderRelation中存放的字符串内容，为“Border relations with Canada have never been better.” 输入此字符串炸弹解除</p>
+<h2 id="phase-2"><a href="#phase-2" class="headerlink" title="phase_2"></a>phase_2</h2><p>phase_2调用了一个read_six_number的函数读取六个数字，查看read_six_number的汇编代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">.text:000000000040145C                 sub     rsp, 18h</span><br><span class="line">.text:0000000000401460                 mov     rdx, rsi</span><br><span class="line">.text:0000000000401463                 lea     rcx, [rsi+4]</span><br><span class="line">.text:0000000000401467                 lea     rax, [rsi+14h]</span><br><span class="line">.text:000000000040146B                 mov     [rsp+18h+var_10], rax</span><br><span class="line">.text:0000000000401470                 lea     rax, [rsi+10h]</span><br><span class="line">.text:0000000000401474                 mov     [rsp+18h+var_18], rax</span><br><span class="line">.text:0000000000401478                 lea     r9, [rsi+0Ch]</span><br><span class="line">.text:000000000040147C                 lea     r8, [rsi+8]</span><br><span class="line">.text:0000000000401480                 mov     esi, offset unk_4025C3</span><br><span class="line">.text:0000000000401485                 mov     eax, 0</span><br><span class="line">.text:000000000040148A                 call    ___isoc99_sscanf</span><br><span class="line">.text:000000000040148F                 cmp     eax, 5</span><br><span class="line">.text:0000000000401492                 jg      short loc_401499</span><br><span class="line">.text:0000000000401494                 call    exp</span><br></pre></td></tr></table></figure>
+
+<p>通过pwndbg调试，可以看到read_six_number这个函数把六个函数放在 <code>$rsp</code>,<code>$rsp+4</code>,<code>$rsp+8</code>,<code>$rsp+12</code>,<code>$rsp+16</code>,<code>$rsp+20</code>的地方，如图所示：</p>
+<p><img src="/pic/image-20231007145215377.png" alt="image-20231007145215377"></p>
+<p>再来看回phase_2的汇编代码:</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">  0x400f05 &lt;phase_2+9&gt;     call   read_six_numbers   &lt;read_six_numbers&gt;</span><br><span class="line"></span><br><span class="line">  0x400f0a &lt;phase_2+14&gt;    cmp    dword ptr [rsp], 1</span><br><span class="line">► 0x400f0e &lt;phase_2+18&gt;  ✔ je     phase_2+52      &lt;phase_2+52&gt;</span><br></pre></td></tr></table></figure>
+
+<p>它比较了rsp处的值和1是否相等，如果相等跳转到&lt;phase_2+52&gt;，否则爆炸，说明第一个数字需要为1。再看&lt;phase_2+0x34&gt;处代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">►  0x400f30 &lt;phase_2+52&gt;    lea    rbx, [rsp + 4]</span><br><span class="line">   0x400f35 &lt;phase_2+57&gt;    lea    rbp, [rsp + 0x18]</span><br><span class="line">   0x400f3a &lt;phase_2+62&gt;    jmp    phase_2+27        &lt;phase_2+27&gt;</span><br></pre></td></tr></table></figure>
+
+<p>发现它将下一个数字的位置给了rbx，最后一个数字后面的位置给了rbp，此时栈上的情况如下：</p>
+<p><img src="/pic/image-20231007150433499.png" alt="image-20231007150433499"></p>
+<p>再看phase_2+27处的代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">► 0x400f17 &lt;phase_2+27&gt;    mov    eax, dword ptr [rbx - 4]</span><br><span class="line">  0x400f1a &lt;phase_2+30&gt;    add    eax, eax</span><br><span class="line">  0x400f1c &lt;phase_2+32&gt;    cmp    dword ptr [rbx], eax</span><br><span class="line">  0x400f1e &lt;phase_2+34&gt;    je     phase_2+41       &lt;phase_2+41&gt;</span><br></pre></td></tr></table></figure>
+
+<p>将rbx所在位置的前一个数给eax，再将eax*2，然后比较rbx处的值和eax值是否相等，如果相等再跳转到phase_2+41。</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">►  0x400f25 &lt;phase_2+41&gt;    add    rbx, 4</span><br><span class="line">   0x400f29 &lt;phase_2+45&gt;    cmp    rbx, rbp</span><br><span class="line">   0x400f2c &lt;phase_2+48&gt;    jne    phase_2+27        &lt;phase_2+27&gt;</span><br></pre></td></tr></table></figure>
+
+<p>rbx挪到下一个数的位置，再将它与rbp作比较，看它是否循环到了结尾，如果没有的话，再跳转到phase_2+27的位置开始循环。</p>
+<p>根据上述规律可以知道，输入的六个整数应该每一个都是前一个数的二倍，且第一个数应该为1，所以这六个整数应该为：1 2 4 8 16 32。</p>
+<h2 id="phase-3"><a href="#phase-3" class="headerlink" title="phase_3"></a>phase_3</h2><p>首先还是看phase_3的代码：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">  0x400f43 &lt;phase_3&gt;       sub    rsp, 0x18</span><br><span class="line">  0x400f47 &lt;phase_3+4&gt;     lea    rcx, [rsp + 0xc]</span><br><span class="line">  0x400f4c &lt;phase_3+9&gt;     lea    rdx, [rsp + 8]</span><br><span class="line">  0x400f51 &lt;phase_3+14&gt;    mov    esi, 0x4025cf</span><br><span class="line">► 0x400f56 &lt;phase_3+19&gt;    mov    eax, 0           &lt;input_strings+160&gt;</span><br><span class="line">  0x400f5b &lt;phase_3+24&gt;    call   __isoc99_sscanf@plt  &lt;__isoc99_sscanf@plt&gt;</span><br></pre></td></tr></table></figure>
+
+<p><img src="/pic/image-20231007155317662.png" alt="image-20231007155317662"></p>
+<p>可以看到0x4025cf处为<code>%d %d</code>，说明这一关是要输入两个整数。通过gdb调试可以知道这两个整数被放在了<code>$rsp+8</code>和<code>$rsp+c</code>的位置</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">0x400f6a &lt;phase_3+39&gt;     cmp    dword ptr [rsp + 8], 7</span><br><span class="line">0x400f6f &lt;phase_3+44&gt;     ja     phase_3+106         &lt;phase_3+106&gt;</span><br></pre></td></tr></table></figure>
+
+<p>第一个整数的需要小于7</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">► 0x400f71 &lt;phase_3+46&gt;     mov    eax, dword ptr [rsp + 8]</span><br><span class="line">  0x400f75 &lt;phase_3+50&gt;     jmp    qword ptr [rax*8 + 0x402470]</span><br></pre></td></tr></table></figure>
+
+<p>然后把第一个整数的值给eax，再根据eax的值跳转到不同的地方，我这里第一个整数输入的1，跳转到如下位置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line">0x400fb9 &lt;phase_3+118&gt;    mov    eax, 0x137</span><br><span class="line">0x400fbe &lt;phase_3+123&gt;    cmp    eax, dword ptr [rsp + 0xc]</span><br><span class="line">0x400fc2 &lt;phase_3+127&gt;    je     phase_3+134          &lt;phase_3+134&gt;</span><br></pre></td></tr></table></figure>
+
+<p>将0x137赋值给eax，然后比较第二个整数（也就是rsp+0xc中的值）和0x137的大小，如果相同的话，解除炸弹，所以当第一个整数为1的时候，第二个整数应为311（也就是0x137）</p>
+<p>当第一个整数输入不同的小于7的值的时候，第二个整数的值相应地也是不同的。跳转表的位置就在0x402470，打印这张表可以看到不同分支的位置：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">dbg&gt; x/8g 0x402470</span><br><span class="line">0x402470:       4198268 4198329</span><br><span class="line">0x402480:       4198275 4198282</span><br><span class="line">0x402490:       4198289 4198296</span><br><span class="line">0x4024a0:       4198303 4198310</span><br></pre></td></tr></table></figure>
+
+<h2 id="phase-4"><a href="#phase-4" class="headerlink" title="phase_4"></a>phase_4</h2><p>同phase_3前面类似</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">  0x40100c &lt;phase_4&gt;       sub    rsp, 0x18</span><br><span class="line">  0x401010 &lt;phase_4+4&gt;     lea    rcx, [rsp + 0xc]</span><br><span class="line">  0x401015 &lt;phase_4+9&gt;     lea    rdx, [rsp + 8]</span><br><span class="line">  0x40101a &lt;phase_4+14&gt;    mov    esi, 0x4025cf</span><br><span class="line">► 0x40101f &lt;phase_4+19&gt;    mov    eax, 0               &lt;input_strings+240&gt;</span><br><span class="line">  0x401024 &lt;phase_4+24&gt;    call   __isoc99_sscanf@plt  &lt;__isoc99_sscanf@plt&gt;</span><br></pre></td></tr></table></figure>
+
+<p>查看0x4025cf处为%d %d，可知这关也是需要输入两个整数：</p>
+<p><img src="/../../../../typora_pictures/image-20231007200558188.png" alt="image-20231007200558188"></p>
+<p>结合汇编代码可以知道这两个整数的位置在<code>$rsp+8</code>和<code>$rsp+c</code></p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">► 0x40102e &lt;phase_4+34&gt;    cmp    dword ptr [rsp + 8], 0xe</span><br><span class="line">  0x401033 &lt;phase_4+39&gt;    jbe    phase_4+46         &lt;phase_4+46&gt;</span><br></pre></td></tr></table></figure>
+
+<p>第一个整数必须小于0xe，也就是14，否则爆炸</p>
+<p>之后调用fun4函数，</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">  0x40103a &lt;phase_4+46&gt;    mov    edx, 0xe</span><br><span class="line">  0x40103f &lt;phase_4+51&gt;    mov    esi, 0</span><br><span class="line">  0x401044 &lt;phase_4+56&gt;    mov    edi, dword ptr [rsp + 8]</span><br><span class="line">► 0x401048 &lt;phase_4+60&gt;    call   func4                      &lt;func4&gt;</span><br></pre></td></tr></table></figure>
+
+<p>func4的三个参数按照rdi rsi rdx的顺序分别是：第一个整数、0、14</p>
+<p>将func4的代码转换成C语言为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">func4</span><span class="params">(<span class="type">int</span> x,<span class="type">int</span> y,<span class="type">int</span> z)</span></span><br><span class="line">&#123;</span><br><span class="line">	<span class="type">int</span> ret=z-y;</span><br><span class="line">    ecx=ret;</span><br><span class="line">    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2023/09/20/Notes-of-%E9%93%BE%E6%8E%A5%E3%80%81%E8%A3%85%E8%BD%BD%E3%80%81%E5%BA%93/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+    
+      <div class="post-comment">
+
+     
+
+     
+    
+    
+
+</div>
+     
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://github.com/zoeingwingkei/frame/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    
+    
+
+  </body>
+</html>
