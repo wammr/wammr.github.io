@@ -261,6 +261,21 @@
 <p>5.跳转到touch3</p>
 <p>一个个步骤来看：</p>
 <p><strong>1.%rsp给%rdi：</strong></p>
+<p>movq%rsp,%rdi的字节编码为48 89 e7，搜索了一下发现没有，看来不能直接通过这个方式传递，需要间接传递</p>
+<p>找找有没有  mov  xxx,%rdi ，在setval_426函数中找到了48 89 c7 90 c3，地址为0x4019c5 ，代表movq  %rax,%rdi</p>
+<p>再找mov xxx,%rax，在addval_190函数中找到了48 89 e0 c3，地址为0x401a06，代表movq %rsp,%rax</p>
+<p>这下就找全了：</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">movq %rsp,%rax     48 89 e0 c3       0x401a06</span><br><span class="line">movq %rax,%rdi     48 89 c7 90 c3    0x4019c5</span><br></pre></td></tr></table></figure>
+
+<p><strong>2.偏移给%rsi</strong></p>
+<p>找找有没有  mov  xxx,%rsi，发现没有</p>
+<p>再找找mov xxx,%esi，在函数addval_436中发现了89 ce 90 90 c3，其中包含89 ce，代表movl %ecx,%esi，90代表nop，地址为0x401a13。找找看有无pop %rcx，也就是59，但没有，说明需要继续往下找。</p>
+<p>再找找mov xxx,%ecx，在函数getval_159中发现了89 d1 38 c9 c3，其中包含89 d1，代表movl %edx,%ecx，38 c9代表cmp %cl,%cl，地址为0x401a34。找找看有无pop %rdx，也就是5a，但没有，说明需要继续往下找。</p>
+<p>再找找mov xxx,%edx，在函数getval_481中发现了89 c2 90 c3，其中包含89 c2，代表movl %eax,%edx，90代表nop，地址为0x4019dd。</p>
+<p>而pop %rax在phase_4就已经找到了，在<code>getval_219</code>中有<code>58 90 c3</code>，说明可以<code>pop %rax</code>，开始的位置在<code>0x4019ab</code>。</p>
+<p>到此为止终于找全了</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">movl %ecx,%esi   89 ce 90 90 c3   0x401a13</span><br><span class="line">movl %edx,%ecx   89 d1 38 c9 c3   0x401a34</span><br><span class="line">movl %eax,%edx   89 c2 90 c3      0x4019dd</span><br><span class="line">pop %rax         58 90 c3         0x4019ab</span><br></pre></td></tr></table></figure>
+
 
 </div> 
 
