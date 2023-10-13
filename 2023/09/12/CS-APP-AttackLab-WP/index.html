@@ -252,27 +252,23 @@
 <p>在函数add_xy中看到 </p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">lea (%rdi,%rsi,1),%rax</span><br><span class="line">ret</span><br></pre></td></tr></table></figure>
 
-<p>发现可以利用一下，把%rsp的值传递给%rdi，把偏移量传递给%rsi，这样的话就把地址给了%rax，这时候再用phase4的操作把%rax的值给%rdi就好了</p>
+<p>发现可以利用一下，把<code>%rsp</code>的值传递给<code>%rdi</code>，把偏移量传递给<code>%rsi</code>，这样的话就把地址给了<code>%rax</code>，这时候再用<code>phase4</code>的操作把<code>%rax</code>的值给<code>%rdi</code>就好了</p>
 <p>总体分为以下几个步骤</p>
-<p>1.%rsp给%rdi</p>
-<p>2.偏移给%rsi</p>
-<p>3.调用add_xy，将cookie字符串地址给%rax</p>
-<p>4.%rax给%rdi</p>
-<p>5.跳转到touch3</p>
+<p>1.%rsp给%rdi    2.偏移给%rsi    3.调用add_xy，将cookie字符串地址给%rax     4.%rax给%rdi    5.跳转到touch3</p>
 <p>一个个步骤来看：</p>
 <p><strong>1.%rsp给%rdi：</strong></p>
-<p>movq%rsp,%rdi的字节编码为48 89 e7，搜索了一下发现没有，看来不能直接通过这个方式传递，需要间接传递</p>
-<p>找找有没有  mov  xxx,%rdi ，在setval_426函数中找到了48 89 c7 90 c3，地址为0x4019c5 ，代表movq  %rax,%rdi</p>
-<p>再找mov xxx,%rax，在addval_190函数中找到了48 89 e0 c3，地址为0x401a06，代表movq %rsp,%rax</p>
+<p><code>movq %rsp,%rdi</code>的字节编码为<code>48 89 e7</code>，搜索了一下发现没有，看来不能直接通过这个方式传递，需要间接传递</p>
+<p>找找有没有  <code>mov  xxx,%rdi</code> ，在<code>setval_426</code>函数中找到了<code>48 89 c7 90 c3</code>，地址为<code>0x4019c5</code> ，代表<code>movq  %rax,%rdi</code></p>
+<p>再找<code>mov xxx,%rax</code>，在<code>addval_190</code>函数中找到了<code>48 89 e0 c3</code>，地址为<code>0x401a06</code>，代表<code>movq %rsp,%rax</code></p>
 <p>这下就找全了：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">movq %rsp,%rax     48 89 e0 c3       0x401a06</span><br><span class="line">movq %rax,%rdi     48 89 c7 90 c3    0x4019c5</span><br></pre></td></tr></table></figure>
 
 <p><strong>2.偏移给%rsi</strong></p>
-<p>找找有没有  mov  xxx,%rsi，发现没有</p>
-<p>再找找mov xxx,%esi，在函数addval_436中发现了89 ce 90 90 c3，其中包含89 ce，代表movl %ecx,%esi，90代表nop，地址为0x401a13。找找看有无pop %rcx，也就是59，但没有，说明需要继续往下找。</p>
-<p>再找找mov xxx,%ecx，在函数getval_159中发现了89 d1 38 c9 c3，其中包含89 d1，代表movl %edx,%ecx，38 c9代表cmp %cl,%cl，地址为0x401a34。找找看有无pop %rdx，也就是5a，但没有，说明需要继续往下找。</p>
-<p>再找找mov xxx,%edx，在函数getval_481中发现了89 c2 90 c3，其中包含89 c2，代表movl %eax,%edx，90代表nop，地址为0x4019dd。</p>
-<p>而pop %rax在phase_4就已经找到了，在<code>getval_219</code>中有<code>58 90 c3</code>，说明可以<code>pop %rax</code>，开始的位置在<code>0x4019ab</code>。</p>
+<p>找找有没有  <code>mov  xxx,%rsi</code>，发现没有</p>
+<p>再找找<code>mov xxx,%esi</code>，在函数<code>addval_436</code>中发现了<code>89 ce 90 90 c3</code>，其中包含<code>89 ce</code>，代表<code>movl %ecx,%esi</code>，<code>90</code>代表<code>nop</code>，地址为<code>0x401a13</code>。找找看有无<code>pop %rcx</code>，也就是<code>59</code>，但没有，说明需要继续往下找。</p>
+<p>再找找<code>mov xxx,%ecx</code>，在函数<code>getval_159</code>中发现了<code>89 d1 38 c9 c3</code>，其中包含<code>89 d1</code>，代表<code>movl %edx,%ecx</code>，<code>38 c9</code>代表<code>cmp %cl,%cl</code>，地址为<code>0x401a34</code>。找找看有无<code>pop %rdx</code>，也就是<code>5a</code>，但没有，说明需要继续往下找。</p>
+<p>再找找<code>mov xxx,%edx</code>，在函数<code>getval_481</code>中发现了<code>89 c2 90 c3</code>，其中包含<code>89 c2</code>，代表<code>movl %eax,%edx</code>，<code>90</code>代表<code>nop</code>，地址为<code>0x4019dd</code>。</p>
+<p>而<code>pop %rax</code>在<code>phase_4</code>就已经找到了，在<code>getval_219</code>中有<code>58 90 c3</code>，说明可以<code>pop %rax</code>，开始的位置在<code>0x4019ab</code>。</p>
 <p>到此为止终于找全了</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br></pre></td><td class="code"><pre><span class="line">pop %rax         58 90 c3         0x4019ab</span><br><span class="line">movl %eax,%edx   89 c2 90 c3      0x4019dd</span><br><span class="line">movl %edx,%ecx   89 d1 38 c9 c3   0x401a34</span><br><span class="line">movl %ecx,%esi   89 ce 90 90 c3   0x401a13</span><br></pre></td></tr></table></figure>
 
@@ -283,7 +279,7 @@
 
 <p>注意事项：</p>
 <ul>
-<li>在执行movq %rsp,%rax之前有个ret，它会将rsp+8，需要注意一下，所以偏移是0x48而不是0x50。(ret会弹出返回地址，然后将rsp的值增加)</li>
+<li>在执行<code>movq %rsp,%rax</code>之前有个<code>ret</code>，它会将<code>%rsp+8</code>，需要注意一下，所以偏移是<code>0x48</code>而不是<code>0x50</code>。(<code>ret</code>会弹出返回地址，然后将<code>%rsp</code>的值增加)</li>
 <li>cookie要给它写成字符串的形式</li>
 <li>cookie要放在高地址，不然放中间没法接着执行了</li>
 </ul>
