@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="wammr">
+
+
+
+
+
+
+
+<title>CS:APP Data Lab WP | Welcome to wa1king_pil0t&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 6.3.0"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">
+          
+            Frame.
+          
+        </a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archive</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/categories/gallery/">Gallery</a>
+              </li> 
+                   
+          
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+                
+                    <span class="post-tag">
+                        <a href="/tags/CS-APP/">
+                            CS:APP
+                        </a>
+                    </span>    
+                           
+            
+        </div>
+        <div class="post-title">
+            
+            
+                CS:APP Data Lab WP
+            
+            
+        </div>
+        <span class="post-date">
+            10月 19, 2023
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <p><strong>实验目的：更加熟悉整数和浮点数的位级表示</strong></p>
+<p><strong>实验要求：仅使用</strong><code>! ˜ &amp; ˆ | + &lt;&lt; &gt;&gt;</code> <strong>这八种运算符实现13个运算要求</strong></p>
+<h2 id="int-bitXor-x-y"><a href="#int-bitXor-x-y" class="headerlink" title="int bitXor(x,y)"></a>int bitXor(x,y)</h2><p>要求：仅能使用 <code>&amp;</code> 和 <code>~</code> ，<code>&amp;</code> 代表按位与， <code>~</code> 代表按位取反</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">bitXor</span><span class="params">(<span class="type">int</span> x, <span class="type">int</span> y)</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> ~(~x&amp;~y)&amp;~(x&amp;y); <span class="comment">//不同时为0和不同时为1，按位与</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<p>~(x&amp;y) 不同时为1</p>
+<p><del>(</del>x&amp;~y)  不同时为0</p>
+<p><del>(</del>x&amp;<del>y)&amp;</del>(x&amp;y)  既不同时为1也不同时为0</p>
+<p>例：x&#x3D;111000, y&#x3D;110100, x&amp;y&#x3D;110000, <del>x&amp;</del>y&#x3D;000011 , <del>(x&amp;y)&#x3D;001111, ~(</del>x&amp;<del>y)&#x3D;111100, ~(</del>x&amp;<del>y)&amp;</del>(x&amp;y)&#x3D;001100</p>
+<h2 id="int-tmin-void"><a href="#int-tmin-void" class="headerlink" title="int tmin(void)"></a>int tmin(void)</h2><p>32位补码所能表示的最小数是-2^31(-2的31次方)，补码的表示为1000 0000 0000 0000 0000 0000 0000 0000</p>
+<p>所以直接return 1000 0000 0000 0000 0000 0000 0000 0000就可以，也就是return 0x1&lt;&lt;31</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">tmin</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0x1</span>&lt;&lt;<span class="number">31</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="int-isTmax-int-x"><a href="#int-isTmax-int-x" class="headerlink" title="int isTmax(int x)"></a>int isTmax(int x)</h2><p>x如果是32位补码的最大值，那就是 <code>0111 1111 1111 1111 1111 1111 1111 1111</code></p>
+<p>先给x+1，变成 <code>1000 0000 0000 0000 0000 0000 0000 0000</code></p>
+<p>然后再给它加上y，变成 <code>1111 1111 1111 1111 1111 1111 1111 1111</code></p>
+<p>取反，变成 <code>0000 0000 0000 0000 0000 0000 0000 0000</code></p>
+<p>再取反，返回1</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">isTmax</span><span class="params">(<span class="type">int</span> x)</span> &#123;</span><br><span class="line">  <span class="type">int</span> y=x;</span><br><span class="line">  x=x+<span class="number">1</span>;</span><br><span class="line">  x=x+y;</span><br><span class="line">  x=~x;</span><br><span class="line">  <span class="keyword">return</span> !x;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="int-allOddBits-int-x"><a href="#int-allOddBits-int-x" class="headerlink" title="int allOddBits(int x)"></a>int allOddBits(int x)</h2><p><strong>关键：掩码相与后异或</strong></p>
+<p>判断所有的奇数位是否都为1，如果是的话返回1，否则返回0。从右往左数分别为第0位、第1位、……</p>
+<p>32位的仅奇数位为1的表示是这样的：<code>1010 1010 1010 1010 1010 1010 1010 1010</code></p>
+<p>这里采用掩码的方式解决这个问题，先定义一个 mask，使mark等于 <code>1010 1010 1010 1010 1010 1010 1010 1010</code></p>
+<p>注意mark不能直接等于0xAAAAAAAA，因为题目要求不能使用超过八位的数</p>
+<p>将它与x做与运算，留下奇数位里为1的位置。然后将它再跟mask做异或，检查是否相等，如果相等的话，应该都为0，这时候在取个逻辑非，就变成返回1了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">allOddBits</span><span class="params">(<span class="type">int</span> x)</span> &#123;</span><br><span class="line">  <span class="type">int</span> mask=<span class="number">0xAA</span>+(OxAA&lt;&lt;<span class="number">8</span>);</span><br><span class="line">  mask=mask+(mask&lt;&lt;<span class="number">16</span>); </span><br><span class="line">  <span class="comment">//int mask=0xAAAAAAAA; //不可以直接定义成这样，因为不允许使用超过8位的数</span></span><br><span class="line">  <span class="keyword">return</span> !((mask&amp;x)^mask);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+<h2 id="int-negate-int-x"><a href="#int-negate-int-x" class="headerlink" title="int negate(int x)"></a>int negate(int x)</h2><p>返回负数</p>
+<p>对于一个数，<strong>其相反数的补码&#x3D;这个数的原码求反码（按位取反）然后再1</strong></p>
+<p>比如，5的原码为00000101，取反后为11111010，再+1后为11111011，这个就是-5的补码</p>
+<p>验证一下，-5的原码为10000101，符号位之后取反，11111010，再+1，得到11111011，得到-5的补码</p>
+<p><strong>本来由原码到补码的过程，是将符号位保留，剩下的位置取反后再加1。如果符号位不保留，直接全部取反+1，相当于改变了符号位，即得到了相反数的补码。</strong></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">negate</span><span class="params">(<span class="type">int</span> x)</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> ~x+<span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="int-isAsciiDigit-int-x"><a href="#int-isAsciiDigit-int-x" class="headerlink" title="int isAsciiDigit(int x)"></a>int isAsciiDigit(int x)</h2><p>判断输入的值是否为0到9的ASCII值，即看输入的范围是否在<code>0x30-0x39</code>的范围当中</p>
+<p>这题的思维很值得学习一下，没想到位运算还能做这种程度的判断</p>
+<p>定义一个<code>sign</code>&#x3D;<code>1000 0000 0000 0000 0000 0000 0000 0000</code>，将<code>sign</code>与某一数做与运算，就可以提取出某数的符号位。</p>
+<p><code>sign|0x39</code>&#x3D; <code>1000 0000 0000 0000 0000 0000 0011 1001</code> </p>
+<p>再将其取反，<code>~(sign|0x39)</code>&#x3D;<code>0111 1111 1111 1111 1111 1111 1100 0110</code>，作为<code>upperbound</code></p>
+<p>试想，如果是一个小于等于<code>0x39</code>的数与<code>upperbound</code>相加，是不会造成溢出的， 也不会造成符号位的改变，符号位仍是0，如果是一个大于<code>0x39</code>的数加上去的话，符号位就会变成1</p>
+<p><code>sign&amp;(x+upperbound)</code>是一个符号位，后面加31个0，只想把符号位提取出来的话，就再右移31位给它提取出来，所以再执行个右移31位的操作</p>
+<p>同理 <code>0x30</code>&#x3D; <code>0000 0000 0000 0000 0000 0000 0011 0000</code></p>
+<p>将其取反，<code>~0x30</code>&#x3D; <code>1111 1111 1111 1111 1111 1111 1100 1111</code>，作为<code>lowerbound</code></p>
+<p>如果是一个大于等于<code>0x30</code>的数与<code>lowerbound+1</code>相加，就会造成溢出，就会有符号位的改变，符号位由1变0，如果是一个小于<code>0x30</code>的数与<code>lowerbound+1</code>相加，就不会溢出，不会有符号位的改变，符号位仍为1</p>
+<p>提取符号位的操作同上所示</p>
+<p>也就是说，如果输入的范围在<code>0x30</code>和<code>0x39</code>当中的话，<code>upperbound</code>和<code>lowerbound</code>的值都应该为0，将二者做或操作，只要有一个为1就为1，再取非，如果<code>upperbound</code>或<code>lowerbound</code>有一个为1的话，也就是说如果大于等于<code>0x30</code>和小于等于<code>0x39</code>有一个没满足的话，最后都为返回0，只有介于<code>0x30</code>和<code>0x39</code>之间，才会返回1</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">isAsciiDigit</span><span class="params">(<span class="type">int</span> x)</span> &#123;</span><br><span class="line">  <span class="type">int</span> sign=<span class="number">0x1</span>&lt;&lt;<span class="number">31</span>;</span><br><span class="line">  <span class="type">int</span> upperbound=~(sign|<span class="number">0x39</span>);</span><br><span class="line">  <span class="type">int</span> lowerbound=~<span class="number">0x30</span>;</span><br><span class="line">  upperbound=sign&amp;(x+upperbound)&gt;&gt;<span class="number">31</span>;</span><br><span class="line">  lowerbound=sign&amp;(x+lowerbound+<span class="number">1</span>)&gt;&gt;<span class="number">31</span>;</span><br><span class="line">  <span class="keyword">return</span> !(upperbound|lowerbound);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="int-conditional-int-x-int-y-int-z"><a href="#int-conditional-int-x-int-y-int-z" class="headerlink" title="int conditional(int x, int y, int z)"></a>int conditional(int x, int y, int z)</h2><p><strong>将一数映射成其逻辑值的方法——取两次非</strong></p>
+<p>如果x为0，<code>!x=1</code>，<code>!!x=0</code> ，就把x映射为0了</p>
+<p>如果x为非0的数，<code>!x=0</code>，<code>!!x=1</code>，就把x映射成1了   </p>
+<p><strong>将0或1变为全0或全1的方法——~x+1</strong></p>
+<p>下一个阶段，将x变为全0或全1</p>
+<p>经过刚才取两次非的操作，如果x为0，现已变成了<code>0000 0000 0000 0000 0000 0000 0000 0000</code> ，如果x为1，现已变成了<code>0000 0000 0000 0000 0000 0000 0000 0001</code></p>
+<p>前者经<del>x+1之后，仍为<code>0000 0000 0000 0000 0000 0000 0000 0000</code>，后者经</del>x+1之后，变成<code>1111 1111 1111 1111 1111 1111 1111 1111</code></p>
+<p><strong>选择是输出y的值还是z的值</strong></p>
+<p>题目要求是x为真的话，输出y的值，x为假的话，输出z的值</p>
+<p>x为真的话，经前两个阶段，x就变成全为1了，输出y，x&amp;y其实就是y，~x&amp;z为0，二者或一下，仍为y的值</p>
+<p>x为假的话，经前两个阶段，x就变成全为0了，输出z，x&amp;y为0，~x&amp;z其实就是z，二者或一下，仍为z的值</p>
+<p>所以返回<code>(x&amp;y)|(-x&amp;z)</code></p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">conditional</span><span class="params">(<span class="type">int</span> x, <span class="type">int</span> y, <span class="type">int</span> z)</span> &#123;</span><br><span class="line">  x=!!x;</span><br><span class="line">  x=~x+<span class="number">1</span>;</span><br><span class="line">  <span class="keyword">return</span> (x&amp;y)|(-x&amp;z);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="int-isLessOrEqual-int-x-int-y"><a href="#int-isLessOrEqual-int-x-int-y" class="headerlink" title="int isLessOrEqual(int x,int y)"></a>int isLessOrEqual(int x,int y)</h2>
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2023/10/09/CS-APP-Malloc-Lab-WP/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+    
+      <div class="post-comment">
+
+     
+
+     
+    
+    
+
+</div>
+     
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://github.com/zoeingwingkei/frame/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    
+    
+
+  </body>
+</html>
