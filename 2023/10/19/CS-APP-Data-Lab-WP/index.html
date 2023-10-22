@@ -238,12 +238,12 @@
 <h2 id="int-logicalNeg-int-x"><a href="#int-logicalNeg-int-x" class="headerlink" title="int logicalNeg(int x)"></a>int logicalNeg(int x)</h2><p>要求：在不适用逻辑运算符 ! 的情况下实现逻辑非的功能</p>
 <p><strong>K1：一个非0的数，和它相反数的补码相与之后的最高位一定是1</strong></p>
 <p>由于<code>x+ (~x)=全1</code>，所以<code>x+(~x+1)=全0</code></p>
-<p>x为非0的时候，x和<del>x+1的最高位一定是一个为1一个为0，所以x|(</del>x+1)的最高位肯定为1</p>
-<p>x为0的话，x和~x+1都全为0，相与自然也全为0</p>
+<p>x为非0的时候，x和<code>~x+1</code>的最高位一定是一个为1一个为0，所以<code>x|(~x+1)</code>的最高位肯定为1</p>
+<p>x为0的话，x和<code>~x+1</code>都全为0，相与自然也全为0</p>
 <p><strong>K2：C语言对于有符号整数来说&gt;&gt;执行的是算术右移，而不是逻辑右移</strong></p>
 <p>x为非0的时候，<code>x|(~x+1)</code>的最高位肯定为1，对<code>x|(~x+1)</code>执行右移31位的操作，做的是算术右移。往后填充的都是符号位1，就生成了一个32位全为1的串，再加上1就变成0了。</p>
 <p><em>算术右移和逻辑右移的区别：10000000如果执行算术右移，变成11111111，如果执行逻辑右移，变成10000000</em></p>
-<p>x为0的时候，x|(~x+1)全为0，再加上1，就返回1了。</p>
+<p>x为0的时候，<code>x|(~x+1)</code>全为0，再加上1，就返回1了。</p>
 <h2 id="howManyBits-x"><a href="#howManyBits-x" class="headerlink" title="howManyBits(x)"></a>howManyBits(x)</h2><p>要求：给出一个数，返回这个数用补码表示至少需要多少位</p>
 <p>思路：如果是正数的话，需要找到最高一位是1的（如果此时需要n位），再加上符号位0，一共是n+1位；如果是负数的话，需要找到最高一位是0的（如果此时需要n位），再加上符号位1，一共是n+1位</p>
 <p><strong>K1：如果x为正不变，如果x为负将它取反，这样不管x是正是负，只要都找最高一位是1的就可以了</strong></p>
