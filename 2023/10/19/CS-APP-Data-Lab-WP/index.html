@@ -144,39 +144,48 @@
 <p><del>(</del>x&amp;~y)  不同时为0</p>
 <p><del>(</del>x&amp;<del>y)&amp;</del>(x&amp;y)  既不同时为1也不同时为0</p>
 <p>例：x&#x3D;111000, y&#x3D;110100, x&amp;y&#x3D;110000, <del>x&amp;</del>y&#x3D;000011 , <del>(x&amp;y)&#x3D;001111, ~(</del>x&amp;<del>y)&#x3D;111100, ~(</del>x&amp;<del>y)&amp;</del>(x&amp;y)&#x3D;001100</p>
-<h2 id="int-tmin-void"><a href="#int-tmin-void" class="headerlink" title="int tmin(void)"></a>int tmin(void)</h2><p>32位补码所能表示的最小数是-2^31(-2的31次方)，补码的表示为1000 0000 0000 0000 0000 0000 0000 0000</p>
+<h2 id="int-tmin-void"><a href="#int-tmin-void" class="headerlink" title="int tmin(void)"></a>int tmin(void)</h2><p>要求：返回32位补码所能表示的最小值</p>
+<p>32位补码所能表示的最小数是-2^31(-2的31次方)，补码的表示为1000 0000 0000 0000 0000 0000 0000 0000</p>
 <p>所以直接return 1000 0000 0000 0000 0000 0000 0000 0000就可以，也就是return 0x1&lt;&lt;31</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">tmin</span><span class="params">(<span class="type">void</span>)</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> <span class="number">0x1</span>&lt;&lt;<span class="number">31</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
 
-<h2 id="int-isTmax-int-x"><a href="#int-isTmax-int-x" class="headerlink" title="int isTmax(int x)"></a>int isTmax(int x)</h2><p>x如果是32位补码的最大值，那就是 <code>0111 1111 1111 1111 1111 1111 1111 1111</code></p>
-<p>先给x+1，变成 <code>1000 0000 0000 0000 0000 0000 0000 0000</code></p>
-<p>然后再给它加上y，变成 <code>1111 1111 1111 1111 1111 1111 1111 1111</code></p>
+<h2 id="int-isTmax-int-x"><a href="#int-isTmax-int-x" class="headerlink" title="int isTmax(int x)"></a>int isTmax(int x)</h2><p>要求：判断x是否为32位补码的最大值</p>
+<p><strong>关键：如何排除-1的情况</strong></p>
+<p>x如果是32位补码的最大值，那就是 <code>0111 1111 1111 1111 1111 1111 1111 1111</code></p>
+<p>先给x+1，令它为i，变成 <code>1000 0000 0000 0000 0000 0000 0000 0000</code></p>
+<p>然后再令x&#x3D;x+i，变成 <code>1111 1111 1111 1111 1111 1111 1111 1111</code></p>
 <p>取反，变成 <code>0000 0000 0000 0000 0000 0000 0000 0000</code></p>
-<p>再取反，返回1</p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">isTmax</span><span class="params">(<span class="type">int</span> x)</span> &#123;</span><br><span class="line">  <span class="type">int</span> y=x;</span><br><span class="line">  x=x+<span class="number">1</span>;</span><br><span class="line">  x=x+y;</span><br><span class="line">  x=~x;</span><br><span class="line">  <span class="keyword">return</span> !x;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<p>再取非，返回1</p>
+<p><strong>BUT，重点来了，当x为-1的时候，这事也成立。</strong> </p>
+<p>-1的补码为<code>1111 1111 1111 1111 1111 1111 1111 1111</code>, i&#x3D;x+1&#x3D;<code>0000 0000 0000 0000 0000 0000 0000 0000</code>,x&#x3D;x+i&#x3D;<code>1111 1111 1111 1111 1111 1111 1111 1111</code></p>
+<p>会发现这种情况的x+i跟最大值那种情况的x+i都是全为1，那该怎么办呢？需要把这种情况区分一下。</p>
+<p>可以注意到，两种情况下， i&#x3D;x+1的值并不相同，最大值的时候得一个非0的数，-1的时候得一个0，既然一个为0另一个非0，就可以通过取非的操作来将二者区分开。</p>
+<p>于是再构造一个<code>i=!i</code>, 最大值的时候i变为0，-1的时候最大值变为1。</p>
+<p>再让<code>x=x+i</code>，最大值的时候x加上i结果不变，还是全为0，取非变1；-1的时候x加上i变成了<code>0000 0000 0000 0000 0000 0000 0000 0001</code>，成了一个非0数，这时候再取非，就变成0了</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">isTmax</span><span class="params">(<span class="type">int</span> x)</span> &#123;</span><br><span class="line">  <span class="type">int</span> i = x+<span class="number">1</span>;<span class="comment">//Tmin,1000...</span></span><br><span class="line">  x=x+i;<span class="comment">//-1,1111...</span></span><br><span class="line">  x=~x;<span class="comment">//0,0000...</span></span><br><span class="line">  i=!i;<span class="comment">//exclude x=0xffff...</span></span><br><span class="line">  x=x+i;<span class="comment">//exclude x=0xffff...</span></span><br><span class="line">  <span class="keyword">return</span> !x;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
 
-<h2 id="int-allOddBits-int-x"><a href="#int-allOddBits-int-x" class="headerlink" title="int allOddBits(int x)"></a>int allOddBits(int x)</h2><p><strong>关键：掩码相与后异或</strong></p>
-<p>判断所有的奇数位是否都为1，如果是的话返回1，否则返回0。从右往左数分别为第0位、第1位、……</p>
+<h2 id="int-allOddBits-int-x"><a href="#int-allOddBits-int-x" class="headerlink" title="int allOddBits(int x)"></a>int allOddBits(int x)</h2><p>要求：判断所有的奇数位是否都为1，如果是的话返回1，否则返回0。从右往左数分别为第0位、第1位、……</p>
+<p><strong>关键：掩码相与后异或</strong></p>
 <p>32位的仅奇数位为1的表示是这样的：<code>1010 1010 1010 1010 1010 1010 1010 1010</code></p>
 <p>这里采用掩码的方式解决这个问题，先定义一个 mask，使mark等于 <code>1010 1010 1010 1010 1010 1010 1010 1010</code></p>
 <p>注意mark不能直接等于0xAAAAAAAA，因为题目要求不能使用超过八位的数</p>
 <p>将它与x做与运算，留下奇数位里为1的位置。然后将它再跟mask做异或，检查是否相等，如果相等的话，应该都为0，这时候在取个逻辑非，就变成返回1了</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">allOddBits</span><span class="params">(<span class="type">int</span> x)</span> &#123;</span><br><span class="line">  <span class="type">int</span> mask=<span class="number">0xAA</span>+(OxAA&lt;&lt;<span class="number">8</span>);</span><br><span class="line">  mask=mask+(mask&lt;&lt;<span class="number">16</span>); </span><br><span class="line">  <span class="comment">//int mask=0xAAAAAAAA; //不可以直接定义成这样，因为不允许使用超过8位的数</span></span><br><span class="line">  <span class="keyword">return</span> !((mask&amp;x)^mask);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<h2 id="int-negate-int-x"><a href="#int-negate-int-x" class="headerlink" title="int negate(int x)"></a>int negate(int x)</h2><p>返回负数</p>
+<h2 id="int-negate-int-x"><a href="#int-negate-int-x" class="headerlink" title="int negate(int x)"></a>int negate(int x)</h2><p>要求：返回负数</p>
 <p>对于一个数，<strong>其相反数的补码&#x3D;这个数的原码求反码（按位取反）然后再1</strong></p>
-<p>比如，5的原码为00000101，取反后为11111010，再+1后为11111011，这个就是-5的补码</p>
-<p>验证一下，-5的原码为10000101，符号位之后取反，11111010，再+1，得到11111011，得到-5的补码</p>
+<p>比如，5的原码为<code>00000101</code>，取反后为<code>11111010</code>，再+1后为<code>11111011</code>，这个就是-5的补码</p>
+<p>验证一下，-5的原码为<code>10000101</code>，符号位之后取反，<code>11111010</code>，再+1，得到<code>11111011</code>，得到-5的补码</p>
 <p><strong>本来由原码到补码的过程，是将符号位保留，剩下的位置取反后再加1。如果符号位不保留，直接全部取反+1，相当于改变了符号位，即得到了相反数的补码。</strong></p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">negate</span><span class="params">(<span class="type">int</span> x)</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> ~x+<span class="number">1</span>;</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
 
-<h2 id="int-isAsciiDigit-int-x"><a href="#int-isAsciiDigit-int-x" class="headerlink" title="int isAsciiDigit(int x)"></a>int isAsciiDigit(int x)</h2><p>判断输入的值是否为0到9的ASCII值，即看输入的范围是否在<code>0x30-0x39</code>的范围当中</p>
+<h2 id="int-isAsciiDigit-int-x"><a href="#int-isAsciiDigit-int-x" class="headerlink" title="int isAsciiDigit(int x)"></a>int isAsciiDigit(int x)</h2><p>要求：判断输入的值是否为0到9的ASCII值，即看输入的范围是否在<code>0x30-0x39</code>的范围当中</p>
 <p>这题的思维很值得学习一下，没想到位运算还能做这种程度的判断</p>
 <p>定义一个<code>sign</code>&#x3D;<code>1000 0000 0000 0000 0000 0000 0000 0000</code>，将<code>sign</code>与某一数做与运算，就可以提取出某数的符号位。</p>
 <p><code>sign|0x39</code>&#x3D; <code>1000 0000 0000 0000 0000 0000 0011 1001</code> </p>
@@ -192,23 +201,60 @@
 
 
 
-<h2 id="int-conditional-int-x-int-y-int-z"><a href="#int-conditional-int-x-int-y-int-z" class="headerlink" title="int conditional(int x, int y, int z)"></a>int conditional(int x, int y, int z)</h2><p><strong>将一数映射成其逻辑值的方法——取两次非</strong></p>
+<h2 id="int-conditional-int-x-int-y-int-z"><a href="#int-conditional-int-x-int-y-int-z" class="headerlink" title="int conditional(int x, int y, int z)"></a>int conditional(int x, int y, int z)</h2><p>要求：实现三目运算符  <code>x?y:z</code></p>
+<p><strong>K1：将一数映射成其逻辑值的方法——取两次非</strong></p>
 <p>如果x为0，<code>!x=1</code>，<code>!!x=0</code> ，就把x映射为0了</p>
 <p>如果x为非0的数，<code>!x=0</code>，<code>!!x=1</code>，就把x映射成1了   </p>
-<p><strong>将0或1变为全0或全1的方法——~x+1</strong></p>
+<p><strong>K2：将0或1变为全0或全1的方法——~x+1</strong></p>
 <p>下一个阶段，将x变为全0或全1</p>
 <p>经过刚才取两次非的操作，如果x为0，现已变成了<code>0000 0000 0000 0000 0000 0000 0000 0000</code> ，如果x为1，现已变成了<code>0000 0000 0000 0000 0000 0000 0000 0001</code></p>
-<p>前者经<del>x+1之后，仍为<code>0000 0000 0000 0000 0000 0000 0000 0000</code>，后者经</del>x+1之后，变成<code>1111 1111 1111 1111 1111 1111 1111 1111</code></p>
-<p><strong>选择是输出y的值还是z的值</strong></p>
-<p>题目要求是x为真的话，输出y的值，x为假的话，输出z的值</p>
+<p>前者经 <code>~x+1</code>之后，仍为<code>0000 0000 0000 0000 0000 0000 0000 0000</code>，后者经 <code>~x+1</code>之后，变成<code>1111 1111 1111 1111 1111 1111 1111 1111</code></p>
+<p><strong>K3：选择是输出y的值还是z的值</strong></p>
+<p>要求：x为真的话，输出y的值，x为假的话，输出z的值</p>
 <p>x为真的话，经前两个阶段，x就变成全为1了，输出y，x&amp;y其实就是y，~x&amp;z为0，二者或一下，仍为y的值</p>
 <p>x为假的话，经前两个阶段，x就变成全为0了，输出z，x&amp;y为0，~x&amp;z其实就是z，二者或一下，仍为z的值</p>
 <p>所以返回<code>(x&amp;y)|(-x&amp;z)</code></p>
-<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">conditional</span><span class="params">(<span class="type">int</span> x, <span class="type">int</span> y, <span class="type">int</span> z)</span> &#123;</span><br><span class="line">  x=!!x;</span><br><span class="line">  x=~x+<span class="number">1</span>;</span><br><span class="line">  <span class="keyword">return</span> (x&amp;y)|(-x&amp;z);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">conditional</span><span class="params">(<span class="type">int</span> x, <span class="type">int</span> y, <span class="type">int</span> z)</span> &#123;</span><br><span class="line">  x=!!x;</span><br><span class="line">  x=~x+<span class="number">1</span>;</span><br><span class="line">  <span class="keyword">return</span> (x&amp;y)|(~x&amp;z);</span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
 
 
-<h2 id="int-isLessOrEqual-int-x-int-y"><a href="#int-isLessOrEqual-int-x-int-y" class="headerlink" title="int isLessOrEqual(int x,int y)"></a>int isLessOrEqual(int x,int y)</h2>
+<h2 id="int-isLessOrEqual-int-x-int-y"><a href="#int-isLessOrEqual-int-x-int-y" class="headerlink" title="int isLessOrEqual(int x,int y)"></a>int isLessOrEqual(int x,int y)</h2><p>要求：判断x≤y是否成立，如果成立则返回1否则返回0  </p>
+<p><strong>思路：分符号相同和符号不同两种情况考虑，如果符号相同，就看y-x的符号，为正则返回0，为负则返回1；如果符号不同就看x的符号是不是为负，如果为负就返回1，否则就返回0</strong></p>
+<p><strong>K1：看y-x符号位的方法</strong></p>
+<p>通过~x+1将x变-x，再和y加起来，提取符号位就先右移31位再和1与来判断</p>
+<p><strong>K2：看x和y符号是否相同的方法</strong></p>
+<p>先提取出x和y的符号位再做异或</p>
+<p>以下给出两种略有细微差异的方法</p>
+<p>第一种是在前面求x和y的符号时就右移31位，在前面就已经右移31位了的话，<code>xsign&amp;ysign</code>的值要么为<code>00000000</code>要么为<code>111111111</code>，这时候要和1与一下，这样bitxor要么为<code>00000000</code>要么为<code>00000001</code>。xy符号不同且x的符号位为1的时候，<code>xsign&gt;&gt;31</code>为11111111，返回的<code>00000001</code>。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">isLessOrEqual</span><span class="params">(<span class="type">int</span> x, <span class="type">int</span> y)</span> &#123;</span><br><span class="line">  <span class="type">int</span> signbit=<span class="number">1</span>&lt;&lt;<span class="number">31</span>;</span><br><span class="line">  <span class="type">int</span> xsign=(x&amp;signbit)&gt;&gt;<span class="number">31</span>;<span class="comment">//x的符号</span></span><br><span class="line">  <span class="type">int</span> ysign=(y&amp;signbit)&gt;&gt;<span class="number">31</span>;<span class="comment">//y的符号</span></span><br><span class="line">  <span class="type">int</span> bitxor=xsign^ysign;<span class="comment">//看x和y符号是否相同，相同为0，不同为1</span></span><br><span class="line">  <span class="type">int</span> negX=~x+<span class="number">1</span>;<span class="comment">//-x</span></span><br><span class="line">  <span class="type">int</span> addX=negX+y;<span class="comment">//y-x</span></span><br><span class="line">  <span class="type">int</span> checksign=addX&gt;&gt;<span class="number">31</span>&amp;<span class="number">1</span>;<span class="comment">//判断y-x的符号,0为正，1为负</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> ((!bitxor)&amp;(!checksign))|(bitxor&amp;(xsign&gt;&gt;<span class="number">31</span>));<span class="comment">//返回1有两种情况，一种是符号相同且y-x是正，第二种是xy符号不同，且x的符号位为1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<p>第二种方法，上来不先右移31位，这样的话bitxor的值要么为<code>00000000</code>要么为<code>00000001</code> (因为最后跟1与了一下)，xsign为<code>11111111</code>的时候，相与就会剩<code>00000001</code>，这样返回就返回1。</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><span class="line"> <span class="type">int</span> <span class="title function_">isLessOrEqual</span><span class="params">(<span class="type">int</span> x, <span class="type">int</span> y)</span> &#123;</span><br><span class="line">  <span class="type">int</span> signbit=<span class="number">1</span>&lt;&lt;<span class="number">31</span>;</span><br><span class="line">  <span class="type">int</span> xsign=x&amp;signbit;</span><br><span class="line">  <span class="type">int</span> ysign=y&amp;signbit;</span><br><span class="line">  <span class="type">int</span> bitxor=xsign^ysign;<span class="comment">//看x和y符号是否相同，相同为0，不同为1</span></span><br><span class="line">  bitxor=(bitxor&gt;&gt;<span class="number">31</span>)&amp;<span class="number">1</span>;</span><br><span class="line">  <span class="type">int</span> negX=~x+<span class="number">1</span>;<span class="comment">//-x</span></span><br><span class="line">  <span class="type">int</span> addX=negX+y;<span class="comment">//y-x</span></span><br><span class="line">  <span class="type">int</span> checksign=addX&gt;&gt;<span class="number">31</span>&amp;<span class="number">1</span>;<span class="comment">//判断y-x的符号,0为正，1为负</span></span><br><span class="line"></span><br><span class="line">  <span class="keyword">return</span> ((!bitxor)&amp;(!checksign))|(bitxor&amp;(xsign&gt;&gt;<span class="number">31</span>));<span class="comment">//返回1有两种情况，一种是符号相同且y-x是正，第二种是xy符号不同，且x的符号位为1</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+<h2 id="int-logicalNeg-int-x"><a href="#int-logicalNeg-int-x" class="headerlink" title="int logicalNeg(int x)"></a>int logicalNeg(int x)</h2><p>要求：在不适用逻辑运算符 ! 的情况下实现逻辑非的功能</p>
+<p><strong>K1：一个非0的数，和它相反数的补码相与之后的最高位一定是1</strong></p>
+<p>由于x+(<del>x)&#x3D;全1，所以x+(</del>x+1)&#x3D;全0</p>
+<p>x为非0的时候，x和<del>x+1的最高位一定是一个为1一个为0，所以x|(</del>x+1)的最高位肯定为1</p>
+<p>x为0的话，x和~x+1都全为0，相与自然也全为0</p>
+<p><strong>K2：C语言对于有符号整数来说&gt;&gt;执行的是算术右移，而不是逻辑右移</strong></p>
+<p>x为非0的时候，x|(<del>x+1)的最高位肯定为1，对x|(</del>x+1)执行右移31位的操作，做的是算术右移。往后填充的都是符号位1，就生成了一个32位全为1的串，再加上1就变成0了。</p>
+<p><em>算术右移和逻辑右移的区别：10000000如果执行算术右移，变成11111111，如果执行逻辑右移，变成10000000</em></p>
+<p>x为0的时候，x|(~x+1)全为0，再加上1，就返回1了。</p>
+<h2 id="howManyBits-x"><a href="#howManyBits-x" class="headerlink" title="howManyBits(x)"></a>howManyBits(x)</h2><p>要求：给出一个数，返回这个数用补码表示至少需要多少位</p>
+<p>思路：如果是正数的话，需要找到最高一位是1的（如果此时需要n位），再加上符号位0，一共是n+1位；如果是负数的话，需要找到最高一位是0的（如果此时需要n位），再加上符号位1，一共是n+1位</p>
+<p><strong>K1：如果x为正不变，如果x为负将它取反，这样不管x是正是负，只要都找最高一位是1的就可以了</strong></p>
+<p>先<code>sign=x&gt;&gt;31</code>提取出x的符号，然后在 <code>x=(sign&amp;~x)|(~sign&amp;x)</code>，实现x若正则不变若负则取反的操作</p>
+<p><strong>K2：逐步缩小范围，找最高一位的1。先找高16位，如果高16位有1，就向高位缩小取值范围，如果高16位没1，就向低位缩小取值范围</strong></p>
+<p>通过 <code>b16 = !!(x&gt;&gt;16)&lt;&lt;4</code> 来判断高16位是否有1。<code>x&gt;&gt;16</code>是提取出前16位，有的话<code>!!(x&gt;&gt;16)</code>就为1，再<code>&lt;&lt;4</code>，将这16位记录下来。由于高16位有1，因此应该向高位缩小范围，于是将x右移16位，<code>x=x&gt;&gt;b16</code>，这里很巧妙，如果高16位没有1的话，b16就为0，x就不用变，下一步执行<code> b8 = !!(x&gt;&gt;8)&lt;&lt;3</code>的话反而是向低位缩小范围了，非常之妙</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">howManyBits</span><span class="params">(<span class="type">int</span> x)</span> &#123;</span><br><span class="line">  <span class="type">int</span> b16,b8,b4,b2,b1,b0;</span><br><span class="line">  <span class="type">int</span> sign=x&gt;&gt;<span class="number">31</span>;<span class="comment">//提取x的符号位，变全0或全1</span></span><br><span class="line">  x=(sign&amp;~x)|(~sign&amp;x);<span class="comment">//如果x为正数就不变，如果x为负数就所有位按位取反</span></span><br><span class="line">  </span><br><span class="line">  b16=!!(x&gt;&gt;<span class="number">16</span>)&lt;&lt;<span class="number">4</span>;<span class="comment">//高16位是否有1</span></span><br><span class="line">  x=x&gt;&gt;b16;<span class="comment">//如果有的话，将其向高位缩小范围</span></span><br><span class="line">  b8=!!(x&gt;&gt;<span class="number">8</span>)&lt;&lt;<span class="number">3</span>;</span><br><span class="line">  x=x&gt;&gt;b8;</span><br><span class="line">  b4=!!(x&gt;&gt;<span class="number">4</span>)&lt;&lt;<span class="number">2</span>;</span><br><span class="line">  x=x&gt;&gt;b4;</span><br><span class="line">  b2=!!(x&gt;&gt;<span class="number">2</span>)&lt;&lt;<span class="number">1</span>;</span><br><span class="line">  x=x&gt;&gt;b2;</span><br><span class="line">  b1=!!(x&gt;&gt;<span class="number">1</span>);</span><br><span class="line">  x=x&gt;&gt;b1;</span><br><span class="line">  b0=x;</span><br><span class="line">  <span class="keyword">return</span> b16+b8+b4+b2+b1+b0+<span class="number">1</span>; </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
+
+
+
+
 </div> 
 
 <script>
