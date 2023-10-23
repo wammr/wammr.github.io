@@ -140,10 +140,10 @@
 <h2 id="int-bitXor-x-y"><a href="#int-bitXor-x-y" class="headerlink" title="int bitXor(x,y)"></a>int bitXor(x,y)</h2><p>要求：仅能使用 <code>&amp;</code> 和 <code>~</code> ，<code>&amp;</code> 代表按位与， <code>~</code> 代表按位取反</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">int</span> <span class="title function_">bitXor</span><span class="params">(<span class="type">int</span> x, <span class="type">int</span> y)</span> &#123;</span><br><span class="line">  <span class="keyword">return</span> ~(~x&amp;~y)&amp;~(x&amp;y); <span class="comment">//不同时为0和不同时为1，按位与</span></span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
 
-<p>~(x&amp;y) 不同时为1</p>
-<p><del>(</del>x&amp;~y)  不同时为0</p>
-<p><del>(</del>x&amp;<del>y)&amp;</del>(x&amp;y)  既不同时为1也不同时为0</p>
-<p>例：x&#x3D;111000, y&#x3D;110100, x&amp;y&#x3D;110000, <del>x&amp;</del>y&#x3D;000011 , <del>(x&amp;y)&#x3D;001111, ~(</del>x&amp;<del>y)&#x3D;111100, ~(</del>x&amp;<del>y)&amp;</del>(x&amp;y)&#x3D;001100</p>
+<p><code>~(x&amp;y)</code> 不同时为1</p>
+<p><code>~(~x&amp;~y)</code>  不同时为0</p>
+<p><code>~(~x&amp;~y)&amp;~(x&amp;y)</code>  既不同时为1也不同时为0</p>
+<p>例：x&#x3D;111000, y&#x3D;110100, x&amp;y&#x3D;110000, <code>~x&amp;~y</code>&#x3D;000011 , <code>~(x&amp;y)</code>&#x3D;001111, <code>~(~x&amp;~y)</code>&#x3D;111100, <code>~(~x&amp;~y)&amp;~(x&amp;y)</code>&#x3D;001100</p>
 <h2 id="int-tmin-void"><a href="#int-tmin-void" class="headerlink" title="int tmin(void)"></a>int tmin(void)</h2><p>要求：返回32位补码所能表示的最小值</p>
 <p>32位补码所能表示的最小数是-2^31(-2的31次方)，补码的表示为1000 0000 0000 0000 0000 0000 0000 0000</p>
 <p>所以直接return 1000 0000 0000 0000 0000 0000 0000 0000就可以，也就是return 0x1&lt;&lt;31</p>
