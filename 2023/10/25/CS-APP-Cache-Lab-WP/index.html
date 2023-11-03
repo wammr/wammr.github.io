@@ -155,7 +155,7 @@
 <h2 id="Part-B-Optimizing-Matrix-Transpose"><a href="#Part-B-Optimizing-Matrix-Transpose" class="headerlink" title="Part B:  Optimizing Matrix Transpose"></a>Part B:  Optimizing Matrix Transpose</h2><h3 id="32-32"><a href="#32-32" class="headerlink" title="32*32"></a>32*32</h3><p>要求：把一个大小为 32 * 32 的A矩阵转置成为一个大小为32 * 32 的B矩阵</p>
 <p>这里的32 * 32是指一行32个int型，一共32行</p>
 <p>由s&#x3D;5,E&#x3D;1,b&#x3D;5可知S&#x3D;32,B&#x3D;32  可以理解为cache有32行，每行可以存32字节，也就是8个int ，可以想象为如下图所示：</p>
-<img src="/pic/image-20231031195020922.png" alt="image-20231031195020922" style="zoom:50%;" />
+<img src="/pic/image-20231031195020922.png" alt="image-20231031195020922" style="zoom:75%;" />
 
 <p>这时候对A和B进行分块考虑是比较好的思考方式，每个块的大小为8 *  8，如下图所示：</p>
 <img src="/pic/image-20231031195357540.png" alt="image-20231031195357540" style="zoom:50%;" />
