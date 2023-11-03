@@ -155,33 +155,33 @@
 <h2 id="Part-B-Optimizing-Matrix-Transpose"><a href="#Part-B-Optimizing-Matrix-Transpose" class="headerlink" title="Part B:  Optimizing Matrix Transpose"></a>Part B:  Optimizing Matrix Transpose</h2><h3 id="32-32"><a href="#32-32" class="headerlink" title="32*32"></a>32*32</h3><p>要求：把一个大小为 32 * 32 的A矩阵转置成为一个大小为32 * 32 的B矩阵</p>
 <p>这里的32 * 32是指一行32个int型，一共32行</p>
 <p>由s&#x3D;5,E&#x3D;1,b&#x3D;5可知S&#x3D;32,B&#x3D;32  可以理解为cache有32行，每行可以存32字节，也就是8个int ，可以想象为如下图所示：</p>
-<img src="/pic/image-20231031195020922.png" alt="image-20231031195020922" style="zoom:75%;" />
+<img src="/pic/image-20231031195020922.png" alt="image-20231031195020922" style="zoom:25%;" />
 
 <p>这时候对A和B进行分块考虑是比较好的思考方式，每个块的大小为8 *  8，如下图所示：</p>
-<img src="/pic/image-20231031195357540.png" alt="image-20231031195357540" style="zoom:75%;" />
+<img src="/pic/image-20231031195357540.png" alt="image-20231031195357540" style="zoom:25%;" />
 
 <p>具体来看每个块上对cache的映射又可以如下图所示：</p>
 <p><img src="/pic/image-20231031201227789.png" alt="image-20231031201227789"></p>
 <p>为什么要分块去考虑呢？可以试想，除了对角线的块以外剩下的块，它跟与之转置后的位置在cache上的映射都是完全不同的，所以不会发生替换上的冲突，比如下图中两个红色块，它们在cache中的映射分别是 <code>1 5 9 13 17 21 25 29</code> , 以及 <code>0 4 8 12 16 20 24 28</code> 。不命中的次数为1 + 8 + 1 * 7  &#x3D; 16，不在对角线上的块一共有12个，所以不在对角线上的命中次数为192。</p>
-<img src="/pic/image-20231031201709634.png" alt="image-20231031201709634" style="zoom:75%;" />
+<img src="/pic/image-20231031201709634.png" alt="image-20231031201709634" style="zoom:25%;" />
 
 <p>对于对角线上的块，拿第一块举例，见下图，如果要将A的第一块的第一行转置到B的第一块的第一列当中去，将发生这样的替换：A0 B0 A0 B4 B8 B12 B16 B20 B24 B28 , 不命中10次</p>
-<img src="/pic/image-20231031202151946.png" alt="image-20231031202151946" style="zoom:50%;" />
+<img src="/pic/image-20231031202151946.png" alt="image-20231031202151946" style="zoom:25%;" />
 
-<img src="/pic/image-20231031203644968.png" alt="image-20231031203644968" style="zoom:50%;" />
+<img src="/pic/image-20231031203644968.png" alt="image-20231031203644968" style="zoom:25%;" />
 
 <p>要将A的第二行转置到B的第二列去，将发生这样的替换：B0 A4 B4 A4, 不命中4次</p>
-<img src="/pic/image-20231031203934723.png" alt="image-20231031203934723" style="zoom:50%;" />
+<img src="/pic/image-20231031203934723.png" alt="image-20231031203934723" style="zoom:25%;" />
 
 <p>A的第三行转置到B的第三列，将发生这样的替换：B4 A8 B8 A8, 不命中4次</p>
-<img src="/pic/image-20231031204216588.png" alt="image-20231031204216588" style="zoom:50%;" />
+<img src="/pic/image-20231031204216588.png" alt="image-20231031204216588" style="zoom:25%;" />
 
 <p>接下来的替换过程类似，如下图所示，相当于一块需要替换10+4*7&#x3D;38次，总共4个对角线上的块，对角线上的块一共不命中38 * 4 &#x3D; 152次</p>
-<img src="/pic/image-20231031204841827.png" alt="image-20231031204841827" style="zoom:50%;" />
+<img src="/pic/image-20231031204841827.png" alt="image-20231031204841827" style="zoom:25%;" />
 
 <p>总共不命中192+152&#x3D;344次，这样的话达不到&lt;300次的要求。</p>
 <p>跑了一次试了试发现果然是344次：</p>
-<img src="/pic/image-20231031210446707.png" alt="image-20231031210446707" style="zoom:80%;" />
+<img src="/pic/image-20231031210446707.png" alt="image-20231031210446707" style="zoom:25%;" />
 
 <p>所以考虑下使用8个变量一次性存下A的一块中的一行后，再给B，代码如下：</p>
 <figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br></pre></td><td class="code"><pre><span class="line"><span class="type">void</span> <span class="title function_">transpose_submit</span><span class="params">(<span class="type">int</span> M, <span class="type">int</span> N, <span class="type">int</span> A[N][M], <span class="type">int</span> B[M][N])</span></span><br><span class="line">&#123;</span><br><span class="line">    </span><br><span class="line">    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; N; i=i+<span class="number">8</span>) &#123;</span><br><span class="line">        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; M; j=j+<span class="number">8</span>) &#123;</span><br><span class="line">            <span class="keyword">for</span>(<span class="type">int</span> k=<span class="number">0</span>;k&lt;<span class="number">8</span>;k++)</span><br><span class="line">            &#123;</span><br><span class="line">                    <span class="type">int</span> tmp_0=A[i+k][j];</span><br><span class="line">                    <span class="type">int</span> tmp_1=A[i+k][j+<span class="number">1</span>];</span><br><span class="line">                    <span class="type">int</span> tmp_2=A[i+k][j+<span class="number">2</span>];</span><br><span class="line">                    <span class="type">int</span> tmp_3=A[i+k][j+<span class="number">3</span>];</span><br><span class="line">                    <span class="type">int</span> tmp_4=A[i+k][j+<span class="number">4</span>];</span><br><span class="line">                    <span class="type">int</span> tmp_5=A[i+k][j+<span class="number">5</span>];</span><br><span class="line">                    <span class="type">int</span> tmp_6=A[i+k][j+<span class="number">6</span>];</span><br><span class="line">                    <span class="type">int</span> tmp_7=A[i+k][j+<span class="number">7</span>];</span><br><span class="line">                    B[j][i+k]=tmp_0;</span><br><span class="line">                    B[j+<span class="number">1</span>][i+k]=tmp_1;</span><br><span class="line">                    B[j+<span class="number">2</span>][i+k]=tmp_2;</span><br><span class="line">                    B[j+<span class="number">3</span>][i+k]=tmp_3;</span><br><span class="line">                    B[j+<span class="number">4</span>][i+k]=tmp_4;</span><br><span class="line">                    B[j+<span class="number">5</span>][i+k]=tmp_5;</span><br><span class="line">                    B[j+<span class="number">6</span>][i+k]=tmp_6;</span><br><span class="line">                    B[j+<span class="number">7</span>][i+k]=tmp_7;</span><br><span class="line">                    <span class="comment">//B[j+m][i+k]=A[i+k][j+m];</span></span><br><span class="line">            &#125;</span><br><span class="line">        &#125;</span><br><span class="line">    &#125;    </span><br><span class="line">&#125;</span><br></pre></td></tr></table></figure>
