@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+
+    <meta name="author" content="wammr">
+
+
+
+
+
+
+
+<title>CS143: Compilers Notes | Welcome to wa1king_pil0t&#39;s BLOG</title>
+
+
+
+    <link rel="icon" href="/favicon.ico">
+
+
+
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&family=Roboto+Mono&display=swap');
+</style>
+
+
+
+    <!-- stylesheets list from _config.yml -->
+    
+    <link rel="stylesheet" href="/css/style.css">
+    
+
+
+
+
+    <!-- scripts list from _config.yml -->
+    
+    <script src="/js/frame.js"></script>
+    
+
+
+
+
+
+
+
+
+
+
+  <meta name="generator" content="Hexo 6.3.0"></head>
+  <body>
+    <div class="mask-border">
+    </div>
+
+    <div class="wrapper">
+
+      <div class="header">
+  <div class="flex-container">
+    <div class="header-inner">
+      <div class="site-brand-container">
+        <a href="/">
+          
+            Frame.
+          
+        </a>
+      </div>
+      <div id="menu-btn" class="menu-btn" onclick="toggleMenu()">
+        Menu
+      </div>
+      <nav class="site-nav">
+        <ul class="menu-list">
+          
+            
+              <li class="menu-item">
+                <a href="/">Home</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/archives/">Archive</a>
+              </li> 
+                   
+          
+            
+              <li class="menu-item">
+                <a href="/categories/gallery/">Gallery</a>
+              </li> 
+                   
+          
+          
+        </ul>
+      </nav>
+    </div>
+  </div>
+</div>
+
+
+      <div class="main">
+        <div class="flex-container">
+          <article id="post">
+
+  
+    <div class="post-head">
+    <div class="post-info">
+        <div class="tag-list">
+            
+        </div>
+        <div class="post-title">
+            
+            
+                CS143: Compilers Notes
+            
+            
+        </div>
+        <span class="post-date">
+            1月 24, 2024
+        </span>
+    </div>
+    <div class="post-img">
+        
+            <div class="h-line-primary"></div>
+              
+    </div>
+</div>
+    <div class="post-content">
+    <h2 id="BB-sth-ahead"><a href="#BB-sth-ahead" class="headerlink" title="BB sth ahead"></a>BB sth ahead</h2><p>对于编译原理的理解一直都是一知半解，停留在本科对Compliers泛泛而谈的阶段，这次的假期学习着重补一下知识短板，选取CS143的课程重新回顾课堂内容，边回顾边自己画图理解，结合实验设置加深对Compiles 的掌握。</p>
+<h2 id="Introduction"><a href="#Introduction" class="headerlink" title="Introduction"></a>Introduction</h2><h3 id="Compiles-vs-Interpreters"><a href="#Compiles-vs-Interpreters" class="headerlink" title="Compiles vs Interpreters"></a><strong>Compiles vs Interpreters</strong></h3><p><img src="/pic/image-20240124090822164.png" alt="image-20240124090822164"></p>
+<h3 id="Structure-of-a-Compiler"><a href="#Structure-of-a-Compiler" class="headerlink" title="Structure of a Compiler"></a>Structure of a Compiler</h3><h4 id="Lexical-Analysis-词法分析"><a href="#Lexical-Analysis-词法分析" class="headerlink" title="Lexical Analysis 词法分析"></a><strong>Lexical Analysis 词法分析</strong></h4><p><strong>Goal:</strong> divides program text into “words” or “tokens”</p>
+<p>理解每个word的性质</p>
+<h4 id="Parsing-Diagramming-Sentences-语法分析"><a href="#Parsing-Diagramming-Sentences-语法分析" class="headerlink" title="Parsing &#x3D; Diagramming Sentences 语法分析"></a>Parsing &#x3D; Diagramming Sentences 语法分析</h4><p><strong>Goal:</strong> understand sentences structure</p>
+<p>理解句子结构，形成一棵parse tree</p>
+<p><img src="/pic/image-20240124094040831.png" alt="image-20240124094040831"></p>
+<h4 id="Semantic-Analysis-语义分析"><a href="#Semantic-Analysis-语义分析" class="headerlink" title="Semantic Analysis 语义分析"></a>Semantic Analysis 语义分析</h4><p><strong>Goal:</strong> understand meaning</p>
+<p>但编译器只能做有限的语义分析，比如catch inconsistencies(类似前后变量类型的检查这类操作)</p>
+<h4 id="Optimization-优化"><a href="#Optimization-优化" class="headerlink" title="Optimization 优化"></a>Optimization 优化</h4><p>Automatically modify programs</p>
+<p><strong>Goal:</strong> Run faster.   Use less memory.</p>
+<p>例：X &#x3D; Y * 0 在X和Y都是整型的情况下可以优化成X&#x3D;0 （但若X和Y均为浮点型的话不能这么优化因为若X为NAN，NAN * 0 &#x3D; NAN）</p>
+<h4 id="Code-Generation"><a href="#Code-Generation" class="headerlink" title="Code Generation"></a>Code Generation</h4><ul>
+<li><p>Produces assembly code(usually)</p>
+</li>
+<li><p>A translation into another language</p>
+</li>
+</ul>
+<h3 id="The-Economy-of-Programming-Language"><a href="#The-Economy-of-Programming-Language" class="headerlink" title="The Economy of Programming Language"></a>The Economy of Programming Language</h3><h4 id="Why-are-there-so-many-programming-languages"><a href="#Why-are-there-so-many-programming-languages" class="headerlink" title="Why are there so many programming languages?"></a>Why are there so many programming languages?</h4><p>很难设计出一种语言，其能满足多种相互冲突的需求。不同的需求对应不同语言的应用</p>
+<ul>
+<li>scientific computing<ul>
+<li>good FP</li>
+<li>good arrays</li>
+<li>parallelism</li>
+<li>—–&gt;FORTRAN</li>
+</ul>
+</li>
+<li>business applications<ul>
+<li>persistence</li>
+<li>report generation</li>
+<li>data analysis</li>
+<li>—–&gt;SQL</li>
+</ul>
+</li>
+<li>systems programming <ul>
+<li>control of resources</li>
+<li>real time constraints</li>
+<li>—–&gt; C&#x2F;C++</li>
+</ul>
+</li>
+</ul>
+<h4 id="Why-are-there-new-programming-languages"><a href="#Why-are-there-new-programming-languages" class="headerlink" title="Why are there new programming languages?"></a>Why are there new programming languages?</h4><p>Widely-used languages are slow to change.</p>
+<p>Easy to start a new language.</p>
+<p>Languages adopted to fill a void.</p>
+<p>已被人们广泛使用的旧的编程语言很难做出改变，因为用户这些年的使用习惯很难改变，所以旧的编程语言很难适应新需求，这就需要新语言的出现满足新的需求。</p>
+<p>但新语言其实很难是全新的，它会与一些前代语言有相似之处。</p>
+<h4 id="What-is-a-good-programming-language"><a href="#What-is-a-good-programming-language" class="headerlink" title="What is a good programming language?"></a>What is a good programming language?</h4><p>There is <strong>no</strong> universally accepted metric for language design.</p>
+<p>没有一个普遍接受的共识说明到底什么是一个好的编程语言。</p>
+<h4 id="conclude"><a href="#conclude" class="headerlink" title="conclude"></a>conclude</h4><ul>
+<li>Application domains have conflicting needs.</li>
+<li>Programmer training is the dominant cost for a programming language.</li>
+</ul>
+<h2 id="Cool"><a href="#Cool" class="headerlink" title="Cool"></a>Cool</h2><h3 id="Cool-Overview"><a href="#Cool-Overview" class="headerlink" title="Cool Overview"></a>Cool Overview</h3><p>这门课提出了一个Classroom-Object-Oriented-Language，简称COOL语言。下面对于Compliers的讲解都是基于为COOL语言实现一个编译器进行的。</p>
+<ul>
+<li><p>Designed to be implementable in a short time</p>
+</li>
+<li><p>Cool compilers &gt;&gt; Cool programs </p>
+</li>
+<li><p>Give a taste of implementation of modern</p>
+<ul>
+<li>Abstraction</li>
+<li>Static typing</li>
+<li>Reuse(inheritance)</li>
+<li>Memory management</li>
+<li>And more…</li>
+</ul>
+</li>
+<li><p>A complete compiler</p>
+<ul>
+<li>Cool -&gt;MIPS assembly language</li>
+</ul>
+</li>
+<li><p>PAs （后面的阶段完成）</p>
+<ul>
+<li>Write a Cool program</li>
+<li>Lexical analysis</li>
+<li>Parsing</li>
+<li>Semantic analysis</li>
+<li>Code generation</li>
+<li>Optimization *</li>
+</ul>
+</li>
+</ul>
+<p>具体的Cool 语言使用规则见：<a target="_blank" rel="noopener" href="https://web.stanford.edu/class/cs143/materials/cool-manual.pdf">cool-manual.pdf (stanford.edu)</a></p>
+<p>对Cool进行编译运行的过程：</p>
+<p>编写一段源程序，假设文件名为test.cl，执行命令<code>coolc test.cl</code> 对test.cl进行编译，编译后会发现当前文件夹下有文件<code>test.s</code>，这是编译完成后的汇编代码（MIPS架构）。之后可以使用spim这个MIPS 模拟器去运行，执行命令<code>spim test.s</code>可以看到运行的信息以及一些统计数据。spim的使用示例如下：</p>
+<figure class="highlight shell"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br></pre></td><td class="code"><pre><span class="line"><span class="meta prompt_">$ </span><span class="language-bash">/usr/class/cs143/bin/spim</span></span><br><span class="line">SPIM Version 6.5 of January 4, 2003</span><br><span class="line">Copyright 1990-2003 by James R. Larus (larus@cs.wisc.edu).</span><br><span class="line">All Rights Reserved.</span><br><span class="line">See the file README for a full copyright notice.</span><br><span class="line">Loaded: /usr/class/cs143/lib/trap.handler</span><br><span class="line">(spim) load &quot;list&quot;</span><br><span class="line">(spim) run</span><br><span class="line">5 4 3 2 1</span><br><span class="line">4 3 2 1</span><br><span class="line">3 2 1</span><br><span class="line">2 1</span><br><span class="line">1</span><br><span class="line">COOL program successfully executed</span><br><span class="line">Stats -- #instructions : 3066</span><br><span class="line"><span class="meta prompt_">#</span><span class="language-bash">reads : 897 <span class="comment">#writes 512 #branches 568 #other 1089</span></span></span><br><span class="line">(spim) quit</span><br></pre></td></tr></table></figure>
+
+
+
+
+
+<h3 id="Cool-example"><a href="#Cool-example" class="headerlink" title="Cool example"></a>Cool example</h3><p>此部分内容等待被填写</p>
+
+</div> 
+
+<script>
+    window.onload = detectors();
+</script>
+    <div class="post-footer">
+    <div class="h-line-primary"></div>
+    <nav class="post-nav">
+        <div class="prev-item">
+           
+        </div>
+        <div class="next-item">
+            
+                <div class="icon arrow-right"></div>
+                <div class="post-link">
+                  <a href="/2023/12/06/MIT6-S081-Lab-Utilities/">Next</a>  
+                </div>  
+            
+        </div>
+    </nav>
+</div>
+
+    
+      <div class="post-comment">
+
+     
+
+     
+    
+    
+
+</div>
+     
+  
+</article>
+        </div>
+      </div>
+      
+      <div class="footer">
+    <div class="flex-container">
+        <div class="footer-text">
+            
+            
+            
+                Powered by <a target="_blank" rel="noopener" href="https://hexo.io/">Hexo</a> & <a target="_blank" rel="noopener" href="https://github.com/zoeingwingkei/frame/">Frame</a>
+                
+        </div>
+    </div>
+</div>
+
+    </div>
+
+    
+    
+
+  </body>
+</html>
